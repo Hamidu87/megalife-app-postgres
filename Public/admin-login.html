@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Login - Megalife Consult</title>
+    <link rel="stylesheet" href="Megalife.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">M</div> <!-- A for Admin -->
+            <div class="header"><h1>Admin Portal</h1><p>Log in to manage the platform.</p></div>
+            <form class="login-form" id="admin-login-form">
+                <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
+                <div class="form-group"><label for="password">Password</label><input type="password" id="password" required></div>
+                <button type="submit" class="signin-btn">Sign In</button>
+            </form>
+            <div id="message-container"></div>
+        </div>
+    </div>
+    <script src="admin-auth.js"></script> <!-- New script -->
+    
+</body>
+</html>

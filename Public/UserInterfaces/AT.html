@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megalife - AirtelTigo Ishare</title>
+    <link rel="stylesheet" href="UserInterfaces.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- Sidebar will be loaded by main.js -->
+        <aside class="sidebar"></aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header will be loaded by main.js -->
+            <header class="main-header"></header>
+
+            <!-- Wallet Balance -->
+            <div class="wallet-balance-bar">
+                <p>Your Wallet Balance: <strong id="wallet-balance">Loading...</strong></p>
+                <a href="E-Topupform.html"><button class="topup-btn">Top Up</button></a>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="notice-bar">
+                <div class="notice-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>IMPORTANT NOTICE</strong>
+                </div>
+                <div class="notice-item">
+                    <i class="fas fa-clock"></i>
+                    <p>AT(ishare) orders are delivered instantly.</p>
+                </div>
+                <div class="notice-item">
+                     <i class="fas fa-envelope"></i>
+                    <p>Report any Complaints within 24 hours - late reports will not be accepted.</p>
+                </div>
+            </div>
+            
+            <!-- Purchase Section -->
+            <section class="purchase-section">
+                <!-- 1. ADDED IDs AND data-provider ATTRIBUTE -->
+                <form class="purchase-form-card" id="purchase-form" data-provider="AirtelTigo">
+                    <div class="form-group">
+                        <label for="phone-number">AirtelTigo Phone Number:</label>
+                        <input type="tel" id="phone-number" placeholder="Enter Phone Number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bundle-size">Select Bundle Size:</label>
+                        <!-- 2. ADDED DATA-PRICE ATTRIBUTES -->
+                        <select id="bundle-size" required>
+    <!-- JavaScript will fill this dropdown with data from the database -->
+    <option value="">Loading bundles...</option>
+</select>
+                    </div>
+                    <!-- 3. ADDED ID TO PRICE DISPLAY -->
+                    <p class="price-display" id="price-display">Price: GHS 0.00</p>
+                    <button type="submit" class="buy-now-btn">Buy Now</button>
+                    <!-- 4. ADDED MESSAGE CONTAINER -->
+                    <div id="message-container" class="message"></div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- 5. CORRECTED SCRIPT TAGS -->
+    <script src="../main.js"></script>
+    <script src="purchase.js"></script>
+<script src="layout.js"></script>
+<script src="../profile.js"></script> 
+</body>
+</html>

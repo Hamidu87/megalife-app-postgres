@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megalife - E-Wallet TopUp</title>
+    <!-- CSS file in the same folder -->
+    <link rel="stylesheet" href="UserInterfaces.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- Sidebar will be loaded by script.js -->
+        <aside class="sidebar"></aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header will be loaded by script.js -->
+            <header class="main-header"></header>
+            
+            <!-- Main container for the top-up section -->
+            <div class="content-wrapper-card">
+                
+                <!-- THIS IS THE MISSING CONTENT -->
+                <div class="wallet-display" id="wallet-display">
+                    <p>Your Current Wallet Balance</p>
+                    <h2 id="wallet-balance-topup">Loading...</h2>
+                </div>
+                
+                <form class="topup-form-card" id="topup-form">
+                    <h3>E-Wallet Top-Up</h3>
+                    <div class="form-group">
+                        <label for="topup-amount">Enter Amount (GHS):</label>
+                        <input type="number" id="topup-amount" placeholder="0.00" required min="1">
+                    </div>
+                    <button type="submit" class="submit-btn">Topup Now</button>
+                </form>
+                
+                <div id="message-container" style="margin-top: 20px;"></div>
+                <!-- END OF MISSING CONTENT -->
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts are in the same folder as this HTML file -->
+    <script src="layout.js"></script>
+    <script src="topup.js"></script> 
+    <script src="../main.js"></script>
+    <script src="../profile.js"></script> 
+</body>
+</html>

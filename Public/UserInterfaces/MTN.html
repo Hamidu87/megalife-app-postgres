@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megalife - MTN Bundles</title>
+    <link rel="stylesheet" href="UserInterfaces.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- Sidebar will be loaded by main.js -->
+        <aside class="sidebar"></aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header will be loaded by main.js -->
+            <header class="main-header"></header>
+
+            <button class="cta-button">Click to Buy MTN special Mashup offer</button>
+
+            <!-- Wallet Balance -->
+            <div class="wallet-balance-bar">
+                <p>Your Wallet Balance: <strong id="wallet-balance">Loading...</strong></p>
+                <!-- CORRECTED: The <a> tag should wrap the button text, or be separate -->
+                <a href="E-Topupform.html"><button class="topup-btn">Top Up</button></a>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="notice-bar">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="notice-text">
+                    <strong>IMPORTANT NOTICE</strong>
+                    <p>Report any Complaints within 24 hours - Late reports will not be accepted.</p>
+                </div>
+            </div>
+            
+            <!-- Purchase Section -->
+            <section class="purchase-section">
+                <!-- 1. ADDED IDs AND DATA ATTRIBUTES TO THE FORM -->
+                <!-- Add data-provider="MTN" to the form -->
+<form class="purchase-form-card" id="purchase-form" data-provider="MTN">
+    <div class="form-group">
+        <label for="phone-number">MTN Phone Number:</label>
+        <input type="tel" id="phone-number" placeholder="Enter Phone Number" required>
+    </div>
+    <div class="form-group">
+        <label for="bundle-size">Select Bundle Size:</label>
+        <!-- YOUR PRICING STYLE WITH DATA-PRICE ATTRIBUTES -->
+        <select id="bundle-size" required>
+    <!-- JavaScript will fill this dropdown with data from the database -->
+    <option value="">Loading bundles...</option>
+</select>
+    </div>
+    <p class="price-display" id="price-display">Price: GHS 0.00</p>
+    <button type="submit" class="buy-now-btn">Buy Now</button>
+    <div id="message-container" class="message"></div>
+</form>
+            </section>
+        </main>
+    </div>
+
+    <!-- 5. CORRECTED SCRIPT TAGS -->
+    <script src="../main.js"></script>
+    <script src="purchase.js"></script>
+    <script src="layout.js"></script>
+    <script src="../profile.js"></script> 
+</body>
+</html>

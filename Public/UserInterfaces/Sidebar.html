@@ -1,0 +1,63 @@
+<div class="sidebar-header">
+    <h2>MEGALIFE</h2>
+</div>
+<nav class="sidebar-nav">
+    <p class="nav-category">MAIN</p>
+    <ul>
+        <li><a href="userdashboard.html"><i class="fa fa-home"></i><span>Dashboard</span></a></li>
+    </ul>
+    <p class="nav-category">SERVICES</p>
+    <ul>
+        <li><a href="E-Topupform.html"><i class="fas fa-wallet"></i><span>E-Wallet TopUp</span></a></li>
+    </ul>
+    <p class="nav-category">HISTORY</p>
+    <ul>
+        <!-- THIS 'has-submenu' CLASS IS CRITICAL -->
+        <li class="has-submenu">
+            <a href="#">
+                <i class="fas fa-history"></i>
+                <span>Order Histories</span>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+            </a>
+            <ul class="submenu">
+                <li><a href="BundleOrders.html">Bundle Orders</a></li> 
+                <li><a href="AllOrders.html">All Orders</a></li>
+                <li><a href="TopupOrders.html">Top Up History</a></li>
+            </ul>
+        </li>
+    </ul>
+    <p class="nav-category">ACTION</p>
+    <ul>
+        <li class="whatsapp-link"><a href="..."><i class="fab fa-whatsapp"></i><span>Join WhatsApp Group</span></a></li>
+    </ul>
+</nav>
+
+<div class="sidebar-footer">
+    <div class="user-profile">
+        <!-- ... your user profile html ... -->
+         <div class="profile-pic-container">
+            <!-- This is the profile picture that will be displayed -->
+            <img src="../assets/images/default-avatar.png" id="profile-pic" alt="User Profile">
+            
+            <!-- This is the hidden file input that the user clicks -->
+            <input type="file" id="file-upload" accept="image/*" style="display: none;">
+            
+            <!-- This label is the visible "camera" icon that triggers the file input -->
+            <label for="file-upload" class="upload-overlay">
+                <i class="fas fa-camera"></i>
+            </label>
+        </div>
+        <div class="user-details">
+            <h4 class="user-name" id="sidebar-user-name">Loading...</h4>
+            <p class="user-email" id="sidebar-user-email">Loading...</p>
+        </div>
+    </div>
+    <!-- The logout link is now part of the footer -->
+    <div class="logout-link">
+        <a href="../login.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </div>
+   
+</div>   
+
+
+

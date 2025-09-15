@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Megalife Consult</title>
+    <!-- Make sure this CSS file is in the correct path -->
+    <link rel="stylesheet" href="Megalife.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">M</div>
+            <div class="header">
+                <h1>Welcome to MEGALIFE CONSULT</h1>
+                <p>Log in to your account to continue</p>
+            </div>
+            
+            <!-- 1. ADDED ID TO FORM -->
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <!-- Your input already had the correct ID -->
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <!-- Your input already had the correct ID -->
+                    <input type="password" id="password" placeholder="********" required>
+                </div>
+                <div class="form-footer">
+                    <a href="forgot-password.html" class="forgot-password">Forgot your password?</a>
+                </div>
+                <button type="submit" class="signin-btn">Sign In</button>
+            </form>
+
+            <!-- 2. ADDED MESSAGE CONTAINER -->
+            <div id="message-container"></div>
+
+            <div class="signup-link">
+                <!-- Make sure you have a signup.html page in the same folder -->
+                <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ADDED THE SCRIPT TAG -->
+    <script src="main.js"></script>
+    
+</body>
+</html>

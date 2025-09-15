@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megalife - Bundle Order History</title>
+    <!-- Make sure your CSS file is correctly linked -->
+    <link rel="stylesheet" href="UserInterfaces.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- Sidebar will be loaded by main.js -->
+        <aside class="sidebar">
+            <!-- This placeholder is for the dynamic sidebar -->
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header will be loaded by main.js -->
+            <header class="main-header"></header>
+
+            <h2 class="page-title">My Bundle Order History</h2>
+            <div class="filter-bar">
+                <input type="text" placeholder="Search Order ID or Recipient">
+                <select>
+                    <option>All</option>
+                    <option>Delivered</option>
+                    <option>Processing</option>
+                </select>
+            </div>
+            
+            <!-- This is the container for our dynamic table. It has the correct ID. -->
+            <div class="history-table" id="bundle-orders-table">
+                <!-- The history.js script will replace this with real data -->
+                <div class="empty-state">Loading your bundle orders...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Correct script tags at the very bottom -->
+    <!-- main.js handles the layout (sidebar/header) and its events -->
+    <script src="../main.js"></script>
+    <!-- history.js handles the data fetching for THIS specific page -->
+    <script src="history.js"></script>
+    <script src="layout.js"></script>
+    <script src="../profile.js"></script> 
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account - Megalife Consult</title>
+    <!-- Make sure this CSS file exists and is styled correctly -->
+    <link rel="stylesheet" href="Megalife.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="logo">M</div>
+            <div class="header">
+                <h1>Create an Account</h1>
+                <p>Join MEGALIFE CONSULT. We'll send a confirmation link to your email.</p>
+            </div>
+            <!-- 1. ADDED ID TO THE FORM -->
+            <form class="signup-form" id="signup-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <!-- The id="first-name" was already correct -->
+                        <input type="text" id="first-name" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <!-- The id="last-name" was already correct -->
+                        <input type="text" id="last-name" placeholder="Doe" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <!-- The id="email" was already correct -->
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telephone">Telephone</label>
+                        <input type="tel" id="telephone" placeholder="024...">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country">
+                            <option value="ghana" selected>Ghana</option>
+                            <option value="nigeria">Nigeria</option>
+                            <option value="usa">United States</option>
+                            <option value="uk">United Kingdom</option>
+                            <option value="Tg">Togo</option>
+                            <option value="Bf">Burkina Faso</option>
+                            <option value="Ml">Mali</option>
+                            <option value="Sa">South Africa</option>
+                            <option value="Bn">Benin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <!-- The id="password" was already correct -->
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <!-- The id="confirm-password" was already correct -->
+                        <input type="password" id="confirm-password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="create-account-btn">Create Account</button>
+            </form>
+
+            <!-- 2. ADDED A CONTAINER FOR MESSAGES -->
+            <div id="message-container"></div>
+            
+            <div class="signin-link">
+                <!-- Ensure you have a login.html page -->
+                <p>Already have an account? <a href="login.html">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ADDED THE SCRIPT TAG AT THE BOTTOM -->
+    <script src="main.js"></script>
+
+</body>
+</html>

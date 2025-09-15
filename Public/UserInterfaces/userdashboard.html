@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megalife Consult - Dashboard</title>
+    <!-- Link to your CSS files -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="UserInterfaces.css">
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- Sidebar will be loaded here by script.js -->
+        <aside class="sidebar">
+            
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header will be loaded here by script.js -->
+            <header class="main-header"></header>
+
+            
+
+            <!-- Statistics Cards Grid -->
+            <section class="stats-grid">
+    <div class="card">
+        <p class="card-title">E-Wallet Balance</p>
+        <h2 class="card-value" id="wallet-balance">GH₵ 0.00</h2>
+        <a href="../E-Topupform.html" class="card-link">Top-up E-wallet</a>
+    </div>
+    <div class="card">
+        <p class="card-title">Total Orders</p>
+        <h2 class="card-value" id="total-orders">0</h2>
+        <a href="AllOrders.html" class="card-link">View all orders</a>
+    </div>
+    <div class="card">
+        <p class="card-title">Total Sales</p>
+        <h2 class="card-value" id="total-sales">GH₵ 0.00</h2>
+        <a href="BundleOrders.html" class="card-link">View bundle orders</a>
+    </div>
+    <div class="card">
+      <p class="card-title">E-Wallet Top-Ups</p>
+        <h2 class="card-value" id="e-wallet-topups">0 (GH₵ 0.00)</h2>
+        <a href="TopupOrders.html" class="card-link">View top-ups</a>
+    </div>
+</section>
+            <!-- Commission Card -->
+            <section class="card-full">
+                <p class="card-title">Current Commission</p>
+                <h2 class="card-value highlight">GH₵ 0.00</h2>
+                <p class="card-subtitle">Last updated: August 16, 2025, 5:54 pm</p>
+            </section>
+
+            <!-- Team & Referral Section -->
+            <section class="team-section">
+                <h3>My Team</h3>
+                <div class="team-grid">
+                    <div class="card">
+                        <p class="card-title">Referral Bonus/Commission</p>
+                        <h2 class="card-value">GH₵ 0.00</h2>
+                        <p class="card-subtitle">Last updated: Never</p>
+                    </div>
+                    <div class="card">
+                        <p class="card-title">Total Referees</p>
+                        <h2 class="card-value">0</h2>
+                    </div>
+                </div>
+            </section>
+<!-- Filter Bar -->
+            <div class="filter-bar">
+                <label for="filter">Filter by:</label>
+                <select id="filter" name="filter">
+                    <option value="all-time">All time</option>
+                    <option value="last-week">Last 7 Days</option>
+                    <option value="last-month">Last 30 Days</option>
+                </select>
+            </div>
+            <section class="referral-section">
+                <h3>Your Referral Link</h3>
+                <div class="input-group">
+                    <input type="text" placeholder="https://rkstores.com/member-req?ref=64" readonly>
+                    <button>Copy</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- This script loads the sidebar & header -->
+    <script src="layout.js"></script>
+    <!-- 2. ADDED NEW SCRIPT for security and data fetching -->
+  <script src="../dashboard.js"></script>
+  <script src="../main.js"></script>
+  <script src="../profile.js"></script> 
+
+</body>
+</html>

@@ -34,8 +34,11 @@ const upload = multer({ storage: storage });
 
 const db = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // THIS IS THE CRITICAL FIX for Render/Neon connection issues
-    ssl: true, 
+    // THIS IS THE CRITICAL AND FINAL FIX
+    // It forces the SSL connection and prevents the 'base' error
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 // --- 6. AUTHENTICATION MIDDLEWARE ---

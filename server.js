@@ -30,9 +30,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // --- 5. DATABASE CONFIGURATION (FOR NEON POSTGRESQL) ---
+const { Pool } = require('pg');
+
 const db = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    // THIS IS THE CRITICAL FIX for Render/Neon connection issues
+    ssl: true, 
 });
 
 // --- 6. AUTHENTICATION MIDDLEWARE ---

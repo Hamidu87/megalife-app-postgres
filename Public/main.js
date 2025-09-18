@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (password !== confirmPassword) return showMessage('Passwords do not match.', 'error');
             
             try {
-                const response = await fetch('http://localhost:3000/register', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fullName: `${firstName} ${lastName}`, email, password, telephone, country }),
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             try {
-                const response = await fetch('http://localhost:3000/login', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'Sending...';
 
             try {
-                const response = await fetch('http://localhost:3000/forgot-password', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newPassword !== confirmPassword) return showMessage('Passwords do not match.', 'error');
             if (!token) return showMessage('Invalid or missing token.', 'error');
             try {
-                const response = await fetch('http://localhost:3000/reset-password', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, newPassword }),

@@ -113,7 +113,7 @@ app.post('/register', async (req, res) => {
         if (result.rows.length > 0) return res.status(409).json({ message: 'An account with this email already exists.' });
         const hashedPassword = await bcrypt.hash(password, 10);
         await db.query('INSERT INTO users ("fullName", email, password, telephone, country) VALUES ($1, $2, $3, $4, $5)', [fullName, email, hashedPassword, telephone, country]);
-        const dashboardUrl = `http://localhost:5500/UserInterfaces/userdashboard.html?welcome=true`;
+        const dashboardUrl = `https://www.megalifeconsult.com/UserInterfaces/userdashboard.html?welcome=true`;
         const msg = { to: email, from: 'abdulhamidu51@gmail.com', subject: 'Welcome!', html: `<a href="${dashboardUrl}">Go to Dashboard</a>` };
         await sgMail.send(msg);
         res.status(201).json({ message: 'User registered successfully!' });
@@ -143,7 +143,7 @@ app.post('/forgot-password', async (req, res) => {
             const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
             const tokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
             await db.query('UPDATE users SET "resetToken" = $1, "resetTokenExpiry" = $2 WHERE id = $3', [hashedToken, tokenExpiry, user.id]);
-            const resetUrl = `http://localhost:5500/reset-password.html?token=${resetToken}`;
+            const resetUrl = `https://www.megalifeconsult.com/reset-password.html?token=${resetToken}`;
             const msg = { to: user.email, from: 'abdulhamidu51@gmail.com', subject: 'Password Reset', html: `<a href="${resetUrl}">Reset Password</a>` };
             await sgMail.send(msg);
         }
@@ -291,7 +291,7 @@ app.post('/initialize-payment', authenticateToken, async (req, res) => {
         const response = await paystack.transaction.initialize({
             email: result.rows[0].email,
             amount: amount * 100,
-            callback_url: `http://localhost:5500/UserInterfaces/userdashboard.html?payment_status=success`,
+            callback_url: `https://www.megalifeconsult.com/UserInterfaces/userdashboard.html?payment_status=success`,
             metadata: { user_id: req.user.userId, action: 'wallet_top_up' }
         });
         res.status(200).json(response.data);

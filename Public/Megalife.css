@@ -179,6 +179,10 @@ body {
     cursor: pointer;
     transition: background-color 0.3s;
 }
+.signin-btn,.create-account-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
 .signin-btn:hover,
 .create-account-btn:hover {
     background-color: #e67e22;
@@ -395,10 +399,19 @@ body {
     cursor: pointer;
     transition: background-color 0.3s;
 }
+.create-account-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
 
 .create-account-btn:hover {
     background-color: #e67e22;
 }
+.create-account-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
 
 /* --- Sign-in Link --- */
 .signin-link {
@@ -635,10 +648,23 @@ pre { background-color: var(--active-bg); padding: 15px; border-radius: 8px; fon
     cursor: pointer;
     font-weight: 500;
 }
+
+#cancel-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+
+
+
 #cancel-btn {
     background-color: var(--active-bg);
 }
 #save-btn {
     background-color: var(--text-dark);
     color: white;
+}
+#save-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }

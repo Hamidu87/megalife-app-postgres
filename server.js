@@ -73,6 +73,24 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Public', 'index.html'));
 });
 
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'login.html'));
+});
+app.get('/signup.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'signup.html'));
+});
+app.get('/forgot-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'forgot-password.html'));
+});
+app.get('/reset-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'reset-password.html'));
+});
+app.get('/verify-email.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'verify-email.html'));
+});
+
+
+
 // An optional API status route
 app.get('/api/status', (req, res) => {
     res.json({ message: 'Hello! The Megalife backend server is running.' });
@@ -135,6 +153,7 @@ res.status(201).json({ message: 'Registration successful! Please check your emai
 // NEW: Email Verification Route
 // Email Verification Route (for MySQL)
 app.post('/verify-email', async (req, res) => {
+    
     try {
         const { token } = req.body;
         if (!token) return res.status(400).json({ message: 'Verification token is required.' });

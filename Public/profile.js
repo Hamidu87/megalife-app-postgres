@@ -21,7 +21,7 @@ function initializeProfileUploader() {
         formData.append('profilePic', file); 
 
         try {
-            const response = await fetch('http://localhost:3000/user/upload-picture', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/upload-picture', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData

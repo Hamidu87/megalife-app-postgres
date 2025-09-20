@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Also, fetch and display the current balance on this page
     const balanceEl = document.getElementById('wallet-balance-topup');
     if (balanceEl) {
-        fetch('http://localhost:3000/user/profile', {
+        fetch('https://megalife-app-postgres.onrender.com/user/profile', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // The fetch URL is correct, pointing to the backend server
-                const response = await fetch('http://localhost:3000/initialize-payment', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/initialize-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

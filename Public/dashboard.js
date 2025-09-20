@@ -351,7 +351,7 @@ function initializeDashboard() {
     async function fetchDashboardSummary() {
         console.log("Fetching dashboard summary from server...");
         try {
-            const response = await fetch('http://localhost:3000/user/dashboard-summary', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/dashboard-summary', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             

@@ -18,7 +18,7 @@ async function fetchBundleOrders() {
 
     tableContainer.innerHTML = '<div class="empty-state">Loading your bundle orders...</div>';
     try {
-        const response = await fetch('http://localhost:3000/user/transactions/bundles', {
+        const response = await fetch('https://megalife-app-postgres.onrender.com/user/transactions/bundles', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch data');
@@ -80,7 +80,7 @@ async function fetchBundleOrders() {
 
         listContainer.innerHTML = '<div class="empty-state">Loading all orders...</div>';
         try {
-            const response = await fetch('http://localhost:3000/user/transactions/all', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/transactions/all', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch data');
@@ -133,7 +133,7 @@ async function fetchBundleOrders() {
 
         tableContainer.innerHTML = '<div class="empty-state">Loading top-up history...</div>';
         try {
-            const response = await fetch('http://localhost:3000/user/transactions/topups', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/transactions/topups', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch data');

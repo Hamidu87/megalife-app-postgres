@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSupportBtn.addEventListener('click', async () => {
             const link = whatsappLinkInput.value;
             try {
-                const response = await fetch('http://localhost:3000/admin/settings', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ name: 'whatsapp_link', value: link })
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendTestEmailBtn.disabled = true;
             sendTestEmailBtn.textContent = 'Sending...';
             try {
-                const response = await fetch('http://localhost:3000/admin/send-test-email', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/send-test-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ recipientEmail: email })
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = document.getElementById('bundle-id').value;
         const bundleData = { provider: document.getElementById('bundle-provider').value, volume: document.getElementById('bundle-volume').value, price: document.getElementById('bundle-price').value };
         const isEditing = !!id;
-        const url = isEditing ? `http://localhost:3000/admin/bundles/${id}` : 'http://localhost:3000/admin/bundles';
+        const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : 'https://megalife-app-postgres.onrender.com/admin/bundles';
         const method = isEditing ? 'PUT' : 'POST';
         try {
             const response = await fetch(url, {
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Edit button was clicked!");
             const id = editBtn.closest('.table-row').dataset.id;
             try {
-                const response = await fetch('http://localhost:3000/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
                 const bundles = await response.json();
                 const bundleToEdit = bundles.find(b => b.id == id);
                 if (bundleToEdit) openBundleModal(bundleToEdit);
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirm('Are you sure you want to delete this bundle?')) {
                 const id = deleteBtn.closest('.table-row').dataset.id;
                 try {
-                    await fetch(`http://localhost:3000/admin/bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                     fetchAllBundles();
                 } catch (error) { console.error('Failed to delete bundle:', error); }
             }
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userTableContainer || !userCountBadge) return;
         userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
         try {
-            const response = await fetch('http://localhost:3000/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) throw new Error('Failed to fetch users');
             const users = await response.json();
             userCountBadge.textContent = users.length;
@@ -215,7 +215,7 @@ async function fetchAllTransactions() {
     transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
 
     try {
-        const response = await fetch('http://localhost:3000/admin/transactions', {
+        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
@@ -271,7 +271,7 @@ async function fetchAllTransactions() {
     async function fetchAllSettings() {
         if (!whatsappLinkInput) return; // Only run if we are on the support page
         try {
-            const response = await fetch('http://localhost:3000/admin/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/settings', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) throw new Error('Failed to fetch settings');
             const settings = await response.json();
             const whatsappLinkSetting = settings.find(s => s.setting_name === 'whatsapp_link');
@@ -291,7 +291,7 @@ async function fetchAllTransactions() {
         const bundlesContainer = document.querySelector('#dataBundlesContent');
         if (!bundlesContainer) return;
         try {
-            const response = await fetch('http://localhost:3000/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) throw new Error('Failed to fetch bundles from server.');
             const bundles = await response.json();
             console.log("Bundles fetched successfully:", bundles);

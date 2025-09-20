@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchCurrentUserBalance() {
         if (!walletBalanceEl) return;
         try {
-            const response = await fetch('http://localhost:3000/user/profile', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Could not fetch balance');
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DYNAMICALLY POPULATE BUNDLE OPTIONS ---
     async function populateBundles() {
         try {
-            const response = await fetch('http://localhost:3000/bundles');
+            const response = await fetch('https://megalife-app-postgres.onrender.com/bundles');
             if (!response.ok) throw new Error('Could not load bundles.');
             const allBundles = await response.json();
             const providerBundles = allBundles.filter(bundle => bundle.provider === provider);
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = 'Processing...';
 
         try {
-             const response = await fetch('http://localhost:3000/purchase-bundle', {
+             const response = await fetch('https://megalife-app-postgres.onrender.com/purchase-bundle', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

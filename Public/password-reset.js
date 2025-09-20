@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'Sending...';
 
             try {
-                const response = await fetch('http://localhost:3000/forgot-password', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!token) return showMessage('Invalid or missing password reset token.', 'error');
             
             try {
-                const response = await fetch('http://localhost:3000/reset-password', {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, newPassword }),

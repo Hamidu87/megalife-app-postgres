@@ -68,7 +68,13 @@ const authenticateAdmin = (req, res, next) => {
 // --- 7. API ROUTES ---
 
 // Homepage Route
+// Homepage Route - Now serves the index.html file
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'index.html'));
+});
+
+// An optional API status route
+app.get('/api/status', (req, res) => {
     res.json({ message: 'Hello! The Megalife backend server is running.' });
 });
 

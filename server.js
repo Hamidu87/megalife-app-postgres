@@ -332,20 +332,40 @@ app.post('/reset-password', async (req, res) => {
     }
 });
 
+// ADMIN LOGIN ROUTE (Final PostgreSQL Version)
 app.post('/admin/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) return res.status(400).json({ message: 'Email and password are required.' });
-        const [admins] = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
-        if (admins.length === 0) return res.status(401).json({ message: 'Invalid credentials.' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required.' });
+        }
+
+        // This is the query that was likely causing the error. This version is correct.
+        const result = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
+        
+        const admins = result.rows;
+        if (admins.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
+        
         const admin = admins[0];
         const isMatch = await bcrypt.compare(password, admin.password);
-        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
-        const token = jwt.sign({ adminId: admin.id, role: 'admin' }, process.env.JWT_SECRET_KEY, { expiresIn: '8h' });
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
+        
+        const token = jwt.sign(
+            { adminId: admin.id, role: 'admin' }, 
+            process.env.JWT_SECRET_KEY, 
+            { expiresIn: '8h' }
+        );
+        
+        console.log(`Admin user logged in: ${admin.email}`);
         res.status(200).json({ message: 'Admin login successful!', token });
+
     } catch (error) {
         console.error('Error during admin login:', error);
-        res.status(500).json({ message: 'Server error.' });
+        res.status(500).json({ message: 'Server error during admin login.' });
     }
 });
 

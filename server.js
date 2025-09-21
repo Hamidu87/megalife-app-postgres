@@ -562,7 +562,7 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Missing all required purchase information.' });
         }
         
-        const [users] = await connection.query('SELECT walletBalance FROM users WHERE id = ? FOR UPDATE', [userId]);
+        const [users] = await connection.query('SELECT walletBalance FROM users WHERE id = $1 FOR UPDATE', [userId]);
         
         if (users.length === 0) {
             await connection.rollback();

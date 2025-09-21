@@ -104,7 +104,8 @@ app.post('/register', async (req, res) => {
         const { fullName, email, password, telephone, country } = req.body;
         if (!fullName || !email || !password) return res.status(400).json({ message: 'All fields are required.' });
 
-        const [users] = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const users = result.rows
         if (users.length > 0) return res.status(409).json({ message: 'An account with this email already exists.' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,16 +160,19 @@ app.post('/verify-email', async (req, res) => {
         if (!token) return res.status(400).json({ message: 'Verification token is required.' });
 
         // Use '?' for MySQL
-        const [users] = await db.query('SELECT * FROM users WHERE verificationToken = ?', [token]);
+        const result = await db.query('SELECT * FROM users WHERE verificationToken = ?', [token]);
+        const users = result.rows;
         if (users.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired verification token.' });
         }
         const user = users[0];
 
-        // Use '?' for MySQL
+        // Use '$1' for MySQL
         await db.query(
             'UPDATE users SET "isVerified" = 1, "verificationToken" = NULL WHERE id = $1',
+
             [user.id]
+
         );
         
         res.status(200).json({ message: 'Account verified successfully! You can now log in.' });
@@ -212,8 +216,8 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Please provide both email and password.' });
         }
 
-        const [users] = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const users = result.rows;
         if (users.length === 0) {
             console.log(`FAIL: No user found for email ${email}.`);
             return res.status(401).json({ message: 'Invalid credentials.' });
@@ -255,8 +259,8 @@ app.post('/forgot-password', async (req, res) => {
         const { email } = req.body;
         console.log(`\n[FORGOT PASSWORD] Step 1: Request received for ${email}.`);
 
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        
+        const result = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        const users = result.rows;
         if (users.length === 0) {
             console.log(`[FORGOT PASSWORD] Step 2: User with email ${email} not found. Sending generic response.`);
             // We still send a 200 OK to prevent email enumeration
@@ -313,7 +317,8 @@ app.post('/reset-password', async (req, res) => {
         const { token, newPassword } = req.body;
         if (!token || !newPassword) return res.status(400).json({ message: 'Token and password are required.' });
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-        const [users] = await db.query('SELECT * FROM users WHERE "resetToken" = $1 AND "resetTokenExpiry" > NOW()', [hashedToken]);
+        const result = await db.query('SELECT * FROM users WHERE "resetToken" = $1 AND "resetTokenExpiry" > NOW()', [hashedToken]);
+        const users = result.rows;
         if (users.length === 0) return res.status(400).json({ message: 'Token is invalid or has expired.' });
         const user = users[0];
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -347,7 +352,8 @@ app.post('/admin/login', async (req, res) => {
 // --- PROTECTED ADMIN ROUTES ---
 app.get('/admin/users', authenticateAdmin, async (req, res) => {
     try {
-        const [users] = await db.query('SELECT id, "fullName", email, telephone, country, "walletBalance", "registrationDate" FROM users ORDER BY "registrationDate" DESC');
+        const result = await db.query('SELECT id, "fullName", email, telephone, country, "walletBalance", "registrationDate" FROM users ORDER BY "registrationDate" DESC');
+        const users = result.rows;
         res.status(200).json(users);
     } catch (error) {
         console.error('Error fetching all users:', error);
@@ -453,7 +459,8 @@ app.post('/admin/send-test-email', authenticateAdmin, async (req, res) => {
 app.get('/user/profile', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [users] = await db.query('SELECT id, "fullName", email, "walletBalance" FROM users WHERE id = $1', [userId]);
+        const result = await db.query('SELECT id, "fullName", email, "walletBalance" FROM users WHERE id = $1', [userId]);
+        const users = result.rows;
         if (users.length === 0) return res.status(404).json({ message: 'User not found.' });
         res.status(200).json(users[0]);
     } catch (error) {

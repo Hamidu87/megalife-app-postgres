@@ -336,7 +336,7 @@ app.post('/admin/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: 'Email and password are required.' });
-        const [admins] = await db.query('SELECT * FROM admins WHERE email = ?', [email]);
+        const [admins] = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
         if (admins.length === 0) return res.status(401).json({ message: 'Invalid credentials.' });
         const admin = admins[0];
         const isMatch = await bcrypt.compare(password, admin.password);

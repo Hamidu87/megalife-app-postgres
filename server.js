@@ -185,19 +185,19 @@ app.post('/verify-email', async (req, res) => {
 
 
 // GET ALL ACTIVE BUNDLES (for user purchase pages)
+// This is the final, correct version for PostgreSQL
 app.get('/bundles', async (req, res) => {
     try {
-        // We only select bundles where 'isActive' is true (or 1)
-        const [bundles] = await db.query(
-            'SELECT * FROM bundles WHERE "isActive" = 1 ORDER BY provider, price'
+        const result = await db.query(
+            'SELECT * FROM bundles WHERE "isActive" = true ORDER BY provider, price'
         );
-        res.status(200).json(bundles);
+        // The data is in the 'rows' property for PostgreSQL
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching active bundles:', error);
         res.status(500).json({ message: 'Server error.' });
     }
 });
-
 
 
 

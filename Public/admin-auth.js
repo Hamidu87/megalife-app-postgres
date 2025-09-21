@@ -12,11 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('https://megalife-app-postgres.onrender.com', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
+               // This is the correct URL, with the /admin/login path
+const response = await fetch('https://megalife-app-postgres.onrender.com/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+});
                 const result = await response.json();
 
                 if (response.ok) {

@@ -260,7 +260,7 @@ app.post('/forgot-password', async (req, res) => {
         const { email } = req.body;
         console.log(`\n[FORGOT PASSWORD] Step 1: Request received for ${email}.`);
 
-        const result = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         const users = result.rows;
         if (users.length === 0) {
             console.log(`[FORGOT PASSWORD] Step 2: User with email ${email} not found. Sending generic response.`);

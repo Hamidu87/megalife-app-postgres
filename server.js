@@ -389,6 +389,31 @@ app.post('/admin/login', async (req, res) => {
     }
 });
 
+
+
+
+
+// TEMPORARY ROUTE to securely set a new admin password
+app.get('/admin/set-password', async (req, res) => {
+    try {
+        const simplePassword = 'admin1234';
+        const hashedPassword = await bcrypt.hash(simplePassword, 10);
+
+        // Update the password for the admin with id = 1
+        await db.query('UPDATE admins SET password = $1 WHERE id = $2', [hashedPassword, 1]);
+
+        res.send(`Admin password has been securely reset. The new password is: ${simplePassword}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to set admin password.');
+    }
+});
+
+
+
+
+
+
 // --- PROTECTED ADMIN ROUTES ---
 app.get('/admin/users', authenticateAdmin, async (req, res) => {
     try {

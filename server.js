@@ -313,23 +313,41 @@ app.post('/forgot-password', async (req, res) => {
     }
 });
 
+// Reset Password Route (Final PostgreSQL Version)
 app.post('/reset-password', async (req, res) => {
     try {
         const { token, newPassword } = req.body;
-        if (!token || !newPassword) return res.status(400).json({ message: 'Token and password are required.' });
+        if (!token || !newPassword) {
+            return res.status(400).json({ message: 'Token and new password are required.' });
+        }
+        
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-        const result = await db.query('SELECT * FROM users WHERE "resetToken" = $1 AND "resetTokenExpiry" > NOW()', [hashedToken]);
+        
+        // CORRECTED QUERY: Use $1 and double quotes for camelCase columns
+        const result = await db.query(
+            'SELECT * FROM users WHERE "resetToken" = $1 AND "resetTokenExpiry" > NOW()', 
+            [hashedToken]
+        );
+        
         const users = result.rows;
-        if (users.length === 0) return res.status(400).json({ message: 'Token is invalid or has expired.' });
+        if (users.length === 0) {
+            return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+        }
+        
         const user = users[0];
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // CORRECTED QUERY: Use $1, $2, etc., and double quotes
         await db.query(
-    'UPDATE users SET password = $1, "isVerified" = 1, "resetToken" = NULL, "resetTokenExpiry" = NULL WHERE id = $1',
-    [hashedPassword, user.id]);
-        res.status(200).json({ message: 'Password has been reset successfully.' });
+            'UPDATE users SET password = $1, "resetToken" = NULL, "resetTokenExpiry" = NULL WHERE id = $2',
+            [hashedPassword, user.id]
+        );
+        
+        res.status(200).json({ message: 'Your password has been reset successfully.' });
+
     } catch (error) {
-        console.error('Error in reset-password:', error);
-        res.status(500).json({ message: 'Server error.' });
+        console.error('Error in /reset-password route:', error);
+        res.status(500).json({ message: 'An internal server error occurred.' });
     }
 });
 

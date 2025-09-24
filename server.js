@@ -151,36 +151,40 @@ res.status(201).json({ message: 'Registration successful! Please check your emai
 
 // NEW: Email Verification Route
 // Email Verification Route (for MySQL)
+// Email Verification Route (Final PostgreSQL Version)
 app.post('/verify-email', async (req, res) => {
-    
     try {
         const { token } = req.body;
-        if (!token) return res.status(400).json({ message: 'Verification token is required.' });
+        if (!token) {
+            return res.status(400).json({ message: 'Verification token is required.' });
+        }
 
-        // Use '?' for MySQL
-        const result = await db.query('SELECT * FROM users WHERE verificationToken = $1', [token]);
+        // CORRECTED QUERY: Use $1 and double quotes for camelCase columns
+        const result = await db.query(
+            'SELECT * FROM users WHERE "verificationToken" = $1', 
+            [token]
+        );
+        
         const users = result.rows;
         if (users.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired verification token.' });
         }
+
         const user = users[0];
 
-        // Use '$1' for MySQL
+        // CORRECTED QUERY: Use $1, $2, etc., and double quotes
         await db.query(
-            'UPDATE users SET "isVerified" = 1, "verificationToken" = NULL WHERE id = $1',
-
+            'UPDATE users SET "isVerified" = true, "verificationToken" = NULL WHERE id = $1',
             [user.id]
-
         );
         
         res.status(200).json({ message: 'Account verified successfully! You can now log in.' });
 
     } catch (error) {
         console.error('Error during email verification:', error);
-        res.status(500).json({ message: 'Server error.' });
+        res.status(500).json({ message: 'An internal server error occurred.' });
     }
 });
-
 
 // GET ALL ACTIVE BUNDLES (for user purchase pages)
 // This is the final, correct version for PostgreSQL

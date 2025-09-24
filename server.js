@@ -158,7 +158,7 @@ app.post('/verify-email', async (req, res) => {
         if (!token) return res.status(400).json({ message: 'Verification token is required.' });
 
         // Use '?' for MySQL
-        const result = await db.query('SELECT * FROM users WHERE verificationToken = ?', [token]);
+        const result = await db.query('SELECT * FROM users WHERE verificationToken = $1', [token]);
         const users = result.rows;
         if (users.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired verification token.' });

@@ -673,25 +673,37 @@ setInterval(async () => {
 
 
 // --- WEBHOOK ROUTE ---
+// Paystack Webhook (Final PostgreSQL Version)
 app.post('/paystack-webhook', async (req, res) => {
     const secret = process.env.PAYSTACK_SECRET_KEY;
     const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
     if (hash !== req.headers['x-paystack-signature']) {
         return res.sendStatus(400);
     }
+    
     const event = req.body;
+    
     if (event.event === 'charge.success') {
         const { amount, reference, metadata } = event.data;
         if (metadata && metadata.action === 'wallet_top_up') {
             try {
                 const topUpAmount = amount / 100;
-                await db.query('UPDATE users SET walletBalance = walletBalance + ? WHERE id = ?', [topUpAmount, metadata.user_id]);
-                console.log(`Wallet updated for user ${metadata.user_id}.`);
+                
+                // THIS IS THE CORRECTED QUERY
+                // It correctly references the column names with double quotes
+                // and uses the standard '+' operator for addition.
+                await db.query(
+                    'UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2',
+                    [topUpAmount, metadata.user_id]
+                );
+                
+                console.log(`Wallet updated for user ${metadata.user_id}. Added: GH₵${topUpAmount}. Ref: ${reference}`);
             } catch (error) {
                 console.error('Webhook wallet update error:', error);
             }
         }
     }
+    
     res.sendStatus(200);
 });
 

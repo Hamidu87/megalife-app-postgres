@@ -118,11 +118,8 @@ app.post('/register', async (req, res) => {
         );
         
         // --- THIS IS THE CRITICAL FIX ---
-
         // 1. THE CORRECT URL for the verification link
-        //    It points to your Live Server and the correct file inside the Public folder.
-        const verificationUrl = `https://www.megalifeconsult.com/Public/verify-email.html?token=${verificationToken}`;
-
+        const verificationUrl = `https://www.megalifeconsult.com/verify-email.html?token=${verificationToken}`;
         // 2. THE CORRECT HTML to make the link a styled button
         const msg = {
             to: email,

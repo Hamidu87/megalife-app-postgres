@@ -21,7 +21,8 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // --- 3. MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'Public')));
+app.use(express.static('Public'));
+
 
 // --- 4. MULTER CONFIGURATION (NEW) ---
 const storage = multer.diskStorage({

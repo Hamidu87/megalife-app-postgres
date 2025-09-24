@@ -1,3 +1,6 @@
+
+/*
+
 // This script handles logic for all user order history pages.
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -171,3 +174,85 @@ async function fetchBundleOrders() {
     fetchAllOrders();
     fetchTopUpHistory();
 });
+
+
+*/
+
+
+
+// This script now handles all logic for ALL user history pages.
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '../login.html'; return; }
+
+    // --- DATA FETCHING & DISPLAY FUNCTIONS ---
+
+    // Function to fetch BUNDLE orders
+    async function fetchBundleOrders() {
+        const tableContainer = document.getElementById('bundle-orders-table');
+        if (!tableContainer) return; // Only run on this page
+        // ... (Your existing, correct logic for fetching bundle orders)
+    }
+
+    // Function to fetch ALL orders
+    async function fetchAllOrders() {
+        const listContainer = document.getElementById('all-orders-list');
+        if (!listContainer) return; // Only run on this page
+        // ... (Your existing, correct logic for fetching all orders)
+    }
+
+    // NEW: Function to fetch TOP-UP history
+    async function fetchTopUpHistory() {
+        const tableContainer = document.getElementById('topup-history-table');
+        if (!tableContainer) return; // Only run on this page
+
+        tableContainer.innerHTML = '<div class="empty-state">Loading top-up history...</div>';
+        try {
+            const response = await fetch('http://localhost:3000/user/transactions/topups', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const transactions = await response.json();
+            
+            // Note: We need to adjust the CSS grid for this table to have fewer columns
+            let tableHTML = `
+                <div class="table-header">
+                    <span>Order ID</span>
+                    <span>Details</span>
+                    <span>Amount</span>
+                    <span>Date & Time</span>
+                    <span>Status</span>
+                </div>`;
+            
+            if (transactions.length > 0) {
+                transactions.forEach(tx => {
+                    tableHTML += `
+                        <div class="table-row">
+                            <span>#${tx.orderId || tx.id}</span>
+                            <span>${tx.details}</span>
+                            <span class="amount-credited">GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
+                            <span>${new Date(tx.transactionsDate).toLocaleString()}</span>
+                            <span><span class="status-badge status-credited">✓ ${tx.status}</span></span>
+                        </div>
+                    `;
+                });
+            } else {
+                tableHTML += `<div class="empty-state">No top-up history found.</div>`;
+            }
+            tableContainer.innerHTML = tableHTML;
+        } catch (error) {
+            console.error("Failed to fetch top-up history:", error);
+            tableContainer.innerHTML = `<div class="empty-state">Error loading history.</div>`;
+        }
+    }
+
+    // --- 3. INITIALIZE THE PAGE ---
+    // The script will now call all three functions.
+    // The 'if' statements inside each function ensure only the correct one runs.
+    fetchBundleOrders();
+    fetchAllOrders();
+    fetchTopUpHistory();
+});
+
+

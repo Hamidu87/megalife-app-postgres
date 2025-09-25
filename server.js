@@ -675,32 +675,46 @@ setInterval(async () => {
 
 // --- WEBHOOK ROUTE ---
 // Paystack Webhook (Final PostgreSQL Version)
+// Paystack Webhook (Final Corrected Version)
 app.post('/paystack-webhook', async (req, res) => {
+    // ... (Your existing signature verification logic is here)
     const secret = process.env.PAYSTACK_SECRET_KEY;
     const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
-    if (hash !== req.headers['x-paystack-signature']) {
-        return res.sendStatus(400);
-    }
+    if (hash !== req.headers['x-paystack-signature']) return res.sendStatus(400);
     
     const event = req.body;
     
     if (event.event === 'charge.success') {
         const { amount, reference, metadata } = event.data;
         if (metadata && metadata.action === 'wallet_top_up') {
+            const client = await db.connect(); // Get a client from the pool for a transaction
             try {
-                const topUpAmount = amount / 100;
+                // Start a database transaction
+                await client.query('BEGIN');
                 
-                // THIS IS THE CORRECTED QUERY
-                // It correctly references the column names with double quotes
-                // and uses the standard '+' operator for addition.
-                await db.query(
-                    'UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2',
-                    [topUpAmount, metadata.user_id]
+                const topUpAmount = amount / 100;
+                const userId = metadata.user_id;
+
+                // 1. Update the user's wallet balance
+                await client.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
+                
+                // 2. THIS IS THE NEW CODE: Create a record in the transactions table
+                await client.query(
+                    'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    [userId, reference, 'Top-Up', 'Wallet Top-Up', topUpAmount, 'Completed', null]
                 );
                 
-                console.log(`Wallet updated for user ${metadata.user_id}. Added: GH₵${topUpAmount}. Ref: ${reference}`);
+                // If both queries succeed, commit the transaction
+                await client.query('COMMIT');
+                
+                console.log(`Wallet updated AND transaction recorded for user ${userId}. Ref: ${reference}`);
             } catch (error) {
-                console.error('Webhook wallet update error:', error);
+                // If anything fails, roll back the transaction
+                await client.query('ROLLBACK');
+                console.error('Webhook processing error:', error);
+            } finally {
+                // ALWAYS release the client
+                client.release();
             }
         }
     }

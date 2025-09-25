@@ -1,5 +1,5 @@
 
-
+/*
 document.addEventListener('DOMContentLoaded', () => {
     // This script handles ALL logic for the admin dashboard page.
 
@@ -332,3 +332,307 @@ async function fetchAllTransactions() {
     console.log("Step 8: Initializing dashboard by fetching users.");
     fetchAllUsers();
 });
+
+
+*/
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    // This script handles ALL logic for the admin dashboard page.
+
+    const isAdminDashboardPage = document.querySelector('.admin-container');
+    if (!isAdminDashboardPage) return; 
+
+    const token = localStorage.getItem('admin_token');
+
+    // --- 1. SECURITY CHECK ---
+    if (!token) {
+        window.location.href = 'admin-login.html';
+        return;
+    }
+
+    // --- 2. GET ALL UI ELEMENTS ---
+    const logoutLink = document.querySelector('.logout-link'); 
+    const tabs = document.querySelectorAll('.content-tabs .tab-item');
+    const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
+    // ADDED: References for the modal
+    const modal = document.getElementById('bundle-modal');
+    const bundleForm = document.getElementById('bundle-form');
+    const cancelBtn = document.getElementById('cancel-btn');
+    // ... (Your other existing element selectors for support)
+
+    // --- 3. EVENT LISTENERS ---
+
+    // Logout Logic
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('admin_token');
+            window.location.href = 'admin-login.html';
+        });
+    }
+
+    // Tab Switching Logic
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function (event) {
+            event.preventDefault();
+            tabs.forEach(item => item.classList.remove('active'));
+            contentPanes.forEach(pane => pane.classList.remove('active'));
+            this.classList.add('active');
+            const targetPane = document.getElementById(this.getAttribute('data-target'));
+            if (targetPane) targetPane.classList.add('active');
+            
+            const targetId = this.getAttribute('data-target');
+            if (targetId === 'userManagementContent') fetchAllUsers();
+            else if (targetId === 'allTransactionsContent') fetchAllTransactions();
+            // ADDED: Handler for Data Bundles tab
+            else if (targetId === 'dataBundlesContent') fetchAllBundles();
+            else if (targetId === 'supportContent') fetchAllSettings();
+        });
+    });
+
+    // ADDED: Modal Form Event Listeners
+    if (cancelBtn) cancelBtn.addEventListener('click', closeBundleModal);
+    if (bundleForm) bundleForm.addEventListener('submit', handleBundleFormSubmit);
+
+    // ADDED: Page-wide listener for dynamic buttons (Add, Edit, Delete)
+    document.addEventListener('click', handleDynamicClicks);
+
+    // ... (Your existing Support Settings button listeners)
+
+
+    // --- 4. MODAL AND FORM FUNCTIONS (NEW SECTION) ---
+    function openBundleModal(bundle = null) {
+        if (!bundleForm) return;
+        bundleForm.reset();
+        if (bundle) {
+            document.getElementById('modal-title').textContent = 'Edit Bundle';
+            document.getElementById('bundle-id').value = bundle.id;
+            document.getElementById('bundle-provider').value = bundle.provider;
+            document.getElementById('bundle-volume').value = bundle.volume;
+            document.getElementById('bundle-price').value = bundle.price;
+        } else {
+            document.getElementById('modal-title').textContent = 'Add New Bundle';
+            document.getElementById('bundle-id').value = '';
+        }
+        if (modal) modal.hidden = false;
+    }
+
+    function closeBundleModal() {
+        if (modal) modal.hidden = true;
+    }
+
+    async function handleBundleFormSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('bundle-id').value;
+        const bundleData = {
+            provider: document.getElementById('bundle-provider').value,
+            volume: document.getElementById('bundle-volume').value,
+            price: document.getElementById('bundle-price').value,
+        };
+        const isEditing = !!id;
+        const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : 'https://megalife-app-postgres.onrender.com/admin/bundles';
+        const method = isEditing ? 'PUT' : 'POST';
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(bundleData)
+            });
+            if (!response.ok) throw new Error('Failed to save bundle.');
+            closeBundleModal();
+            fetchAllBundles(); // Refresh the list
+        } catch (error) {
+            console.error('Error saving bundle:', error);
+            alert('An error occurred while saving.');
+        }
+    }
+
+    async function handleDynamicClicks(e) {
+        if (e.target.closest('.add-bundle-btn')) openBundleModal();
+        
+        const editBtn = e.target.closest('.action-edit');
+        if (editBtn) {
+            const id = editBtn.closest('.table-row').dataset.id;
+            try {
+                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+                const bundles = await response.json();
+                const bundleToEdit = bundles.find(b => b.id == id);
+                if (bundleToEdit) openBundleModal(bundleToEdit);
+            } catch (error) { console.error('Error preparing edit:', error); }
+        }
+
+        const deleteBtn = e.target.closest('.action-delete');
+        if (deleteBtn) {
+            if (confirm('Are you sure?')) {
+                const id = deleteBtn.closest('.table-row').dataset.id;
+                try {
+                    await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    fetchAllBundles(); // Refresh
+                } catch (error) { console.error('Failed to delete bundle:', error); }
+            }
+        }
+    }
+
+    // --- 5. DATA FETCHING FUNCTIONS ---
+   async function fetchAllUsers() {
+        const userTableContainer = document.querySelector('#userManagementContent .user-table');
+        const userCountBadge = document.querySelector('.tab-item[data-target="userManagementContent"] .badge');
+        if (!userTableContainer || !userCountBadge) return;
+        userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error('Failed to fetch users');
+            const users = await response.json();
+            userCountBadge.textContent = users.length;
+            let tableHTML = `<div class="table-header"><span>Full Name</span><span>Email</span><span>Telephone</span><span>Country</span><span>Wallet Balance</span><span>Registered On</span><span>Status</span><span>Actions</span></div>`;
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const registrationDate = new Date(user.registrationDate).toLocaleString();
+                    tableHTML += `<div class="table-row"><span>${user.fullName}</span><span>${user.email}</span><span>${user.telephone || 'N/A'}</span><span>${user.country || 'N/A'}</span><span>GH₵ ${parseFloat(user.walletBalance).toFixed(2)}</span><span>${registrationDate}</span><span><span class="status-badge status-active">Active</span></span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div>`;
+                });
+            } else {
+                tableHTML += `<div class="empty-state">No users found.</div>`;
+            }
+            userTableContainer.innerHTML = tableHTML;
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+            userTableContainer.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
+        }
+    }
+
+   // Function to fetch and display ALL TRANSACTIONS (Corrected)
+async function fetchAllTransactions() {
+    const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
+    if (!transTableContainer) return;
+    
+    transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
+
+    try {
+        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+        
+        const transactions = await response.json();
+        
+        // 1. ADD "RECIPIENT" TO THE TABLE HEADER
+        let tableHTML = `
+            <div class="table-header">
+                <span>User</span>
+                <span>Type</span>
+                <span>Details</span>
+                <span>Recipient</span> <!-- NEW COLUMN -->
+                <span>Amount</span>
+                <span>Date</span>
+                <span>Status</span>
+            </div>
+            <div class="table-body">`;
+
+        if (transactions.length > 0) {
+            transactions.forEach(tx => {
+                const transDate = new Date(tx.transactionsDate).toLocaleString();
+                let statusBadgeClass = 'status-completed';
+                if (tx.status.toLowerCase() === 'failed') statusBadgeClass = 'status-failed';
+                if (tx.status.toLowerCase() === 'pending') statusBadgeClass = 'status-pending';
+
+                // 2. ADD THE RECIPIENT DATA TO THE TABLE ROW
+                tableHTML += `
+                    <div class="table-row">
+                        <span>${tx.fullName || 'N/A'}</span>
+                        <span>${tx.type}</span>
+                        <span>${tx.details}</span>
+                        <span>${tx.recipient || 'N/A'}</span> <!-- NEW DATA CELL -->
+                        <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
+                        <span>${transDate}</span>
+                        <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
+                    </div>
+                `;
+            });
+        } else {
+            tableHTML += `<div class="empty-state">No transactions found.</div>`;
+        }
+
+        tableHTML += `</div>`;
+        transTableContainer.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error('Failed to fetch transactions:', error);
+        transTableContainer.innerHTML = '<div class="empty-state">Failed to load transactions.</div>';
+    }
+}
+    // NEW FUNCTION for fetching settings
+    async function fetchAllSettings() {
+        if (!whatsappLinkInput) return; // Only run if we are on the support page
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error('Failed to fetch settings');
+            const settings = await response.json();
+            const whatsappLinkSetting = settings.find(s => s.setting_name === 'whatsapp_link');
+            if (whatsappLinkSetting) {
+                whatsappLinkInput.value = whatsappLinkSetting.setting_value;
+            }
+        } catch (error) { 
+            console.error('Failed to fetch settings:', error); 
+            // Optionally, show an error message to the admin
+            whatsappLinkInput.value = 'Error loading setting.';
+        }
+    }
+    // ADDED: The function to fetch and display bundles
+    async function fetchAllBundles() {
+        const bundlesContainer = document.querySelector('#dataBundlesContent');
+        if (!bundlesContainer) return;
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error('Failed to fetch bundles.');
+            const bundles = await response.json();
+            const bundlesByProvider = { MTN: [], AirtelTigo: [], Telecel: [] };
+            bundles.forEach(bundle => {
+                if (bundlesByProvider[bundle.provider]) {
+                    bundlesByProvider[bundle.provider].push(bundle);
+                }
+            });
+            ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
+                const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
+                if (card) {
+                    const tableBody = card.querySelector('.bundle-table .table-body');
+                    tableBody.innerHTML = '';
+                    const providerBundles = bundlesByProvider[provider];
+                    if (providerBundles && providerBundles.length > 0) {
+                        providerBundles.forEach(bundle => {
+                            tableBody.innerHTML += `
+                                <div class="table-row" data-id="${bundle.id}">
+                                    <span>${bundle.volume}</span>
+                                    <span>${parseFloat(bundle.price).toFixed(2)}</span>
+                                    <div class="actions">
+                                        <i class="fas fa-edit action-edit"></i>
+                                        <i class="fas fa-trash action-delete"></i>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                }
+            });
+        } catch (error) { 
+            console.error('Error fetching/rendering bundles:', error); 
+        }
+    }
+
+    // --- 6. INITIALIZE THE DASHBOARD ---
+    fetchAllUsers();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+

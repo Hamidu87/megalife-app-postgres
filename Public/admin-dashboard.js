@@ -582,61 +582,60 @@ async function fetchAllTransactions() {
     // ADDED: The function to fetch and display bundles
     // Function to fetch and display ALL BUNDLES (with cache-busting)
 async function fetchAllBundles() {
-    console.log("Fetching all bundles with cache-busting...");
-    const bundlesContainer = document.querySelector('#dataBundlesContent');
-    if (!bundlesContainer) return;
+        const bundlesContainer = document.querySelector('#dataBundlesContent');
+        if (!bundlesContainer) return;
 
-    try {
-        // THIS IS THE CRITICAL FIX: Add cache-control headers
-        const response = await fetch('http://localhost:3000/admin/bundles', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch bundles from server.');
-        
-        const bundles = await response.json();
-        console.log("Fresh bundles fetched successfully:", bundles);
-        
-        const bundlesByProvider = { MTN: [], AirtelTigo: [], Telecel: [] };
-        bundles.forEach(bundle => {
-            if (bundlesByProvider[bundle.provider]) {
-                bundlesByProvider[bundle.provider].push(bundle);
-            }
-        });
-
-        // Loop and render the cards
-        ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
-            const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
-            if (card) {
-                const tableBody = card.querySelector('.bundle-table .table-body');
-                tableBody.innerHTML = ''; // Always clear old data
-                const providerBundles = bundlesByProvider[provider];
-                if (providerBundles && providerBundles.length > 0) {
-                    providerBundles.forEach(bundle => {
-                        tableBody.innerHTML += `
-                            <div class="table-row" data-id="${bundle.id}">
-                                <span>${bundle.volume}</span>
-                                <span>${parseFloat(bundle.price).toFixed(2)}</span>
-                                <div class="actions">
-                                    <i class="fas fa-edit action-edit"></i>
-                                    <i class="fas fa-trash action-delete"></i>
-                                </div>
-                            </div>`;
-                    });
+        try {
+            const response = await fetch('http://localhost:3000/admin/bundles', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache' // Simple cache-bust for good measure
                 }
-            }
-        });
-        console.log("Bundle display has been refreshed with fresh data.");
-    } catch (error) { 
-        console.error('Error fetching and rendering bundles:', error); 
+            });
+            if (!response.ok) throw new Error('Failed to fetch bundles from server.');
+            
+            const bundles = await response.json();
+            
+            // Group the bundles by their provider
+            const bundlesByProvider = bundles.reduce((acc, bundle) => {
+                (acc[bundle.provider] = acc[bundle.provider] || []).push(bundle);
+                return acc;
+            }, {});
+
+            // Loop through each provider card that exists on the page
+            ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
+                const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
+                if (card) {
+                    // THIS IS THE KEY: We target the specific 'table-body' container
+                    const tableBody = card.querySelector('.bundle-table .table-body');
+                    if (tableBody) {
+                        // 1. Always clear the old content from this specific container
+                        tableBody.innerHTML = '';
+                        
+                        const providerBundles = bundlesByProvider[provider];
+
+                        // 2. If there are bundles for this provider, build the new rows
+                        if (providerBundles && providerBundles.length > 0) {
+                            providerBundles.forEach(bundle => {
+                                tableBody.innerHTML += `
+                                    <div class="table-row" data-id="${bundle.id}">
+                                        <span>${bundle.volume}</span>
+                                        <span>${parseFloat(bundle.price).toFixed(2)}</span>
+                                        <div class="actions">
+                                            <i class="fas fa-edit action-edit"></i>
+                                            <i class="fas fa-trash action-delete"></i>
+                                        </div>
+                                    </div>`;
+                            });
+                        }
+                    }
+                }
+            });
+        } catch (error) { 
+            console.error('Error fetching and rendering bundles:', error); 
+        }
     }
-}
+
     // --- 6. INITIALIZE THE DASHBOARD ---
     fetchAllUsers();
 });

@@ -461,13 +461,16 @@ app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
 });
 
 // DELETE a bundle
-app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
+// READ all bundles (Final PostgreSQL Version)
+app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const { id } = req.params;
-        await db.query('DELETE FROM bundles WHERE id = $1', [id]);
-        res.status(200).json({ message: 'Bundle deleted successfully.' });
+        // Use result.rows for PostgreSQL
+        const result = await db.query('SELECT * FROM bundles ORDER BY provider, price');
+        const bundles = result.rows;
+        
+        res.status(200).json(bundles);
     } catch (error) {
-        console.error('Error deleting bundle:', error);
+        console.error('Error fetching bundles:', error);
         res.status(500).json({ message: 'Server error.' });
     }
 });

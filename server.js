@@ -416,99 +416,6 @@ app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
 
 
 
-
-
-
-
-/*
-
-
-
-
-// --- BUNDLE MANAGEMENT (CRUD) ---
-// READ all bundles
-app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
-    try {
-        const [bundles] = await db.query('SELECT * FROM bundles ORDER BY provider, price');
-        res.status(200).json(bundles);
-    } catch (error) {
-        console.error('Error fetching bundles:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
-});
-
-// CREATE a new bundle
-app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
-    try {
-        const { provider, volume, price } = req.body;
-        if (!provider || !volume || !price) {
-            return res.status(400).json({ message: 'Provider, volume, and price are required.' });
-        }
-        await db.query(
-            'INSERT INTO bundles (provider, volume, price) VALUES ($1, $2, $3)',
-            [provider, volume, price]
-        );
-        res.status(201).json({ message: 'Bundle created successfully.' });
-    } catch (error) {
-        console.error('Error creating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
-});
-
-// UPDATE a bundle
-app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { volume, price } = req.body;
-        if (!volume || !price) {
-            return res.status(400).json({ message: 'Volume and price are required.' });
-        }
-        await db.query(
-            'UPDATE bundles SET volume = $1, price = $2 WHERE id = $3',
-            [volume, price, id]
-        );
-        res.status(200).json({ message: 'Bundle updated successfully.' });
-    } catch (error) {
-        console.error('Error updating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
-});
-
-// DELETE a bundle
-// READ all bundles (Final PostgreSQL Version)
-app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
-    try {
-        // Use result.rows for PostgreSQL
-        const result = await db.query('SELECT * FROM bundles ORDER BY provider, price');
-        const bundles = result.rows;
-        
-        res.status(200).json(bundles);
-    } catch (error) {
-        console.error('Error fetching bundles:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
-});
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
         const [bundles] = await db.query('SELECT * FROM bundles ORDER BY provider, price');
@@ -567,32 +474,6 @@ app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

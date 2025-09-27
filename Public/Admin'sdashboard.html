@@ -9,10 +9,10 @@
 </head>
 <body>
     <div class="admin-container">
-        <!-- The Stable Sidebar (Unchanged) -->
+        <!-- The Stable Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header"><div class="logo">M</div><span class="logo-text">MEGALIFE</span></div>
-            <nav class="sidebar-nav"><ul><li class="active"><a href="admin-dashboard.html"><i class="fa fa-home"></i><span>Dashboard</span></a></li></ul></nav>
+            <nav class="sidebar-nav"><ul><li class="active"><a href="Admin'sdashboard.html"><i class="fa fa-home"></i><span>Dashboard</span></a></li></ul></nav>
             <div class="sidebar-footer">
                 <div class="user-profile">
                     <div class="profile-pic-container"><img src="https://i.imgur.com/V320n2c.png" id="profile-pic" alt="Admin Profile"></div>
@@ -22,7 +22,7 @@
             </div>
         </aside>
 
-        <!-- The Main Content Area (Unchanged) -->
+        <!-- The Main Content Area -->
         <main class="main-content">
             <header class="main-header"><h2>Admin Dashboard</h2></header>
             
@@ -37,65 +37,109 @@
 
             <div class="tab-content-wrapper">
 
-                <!-- User Management Content (Unchanged) -->
+                <!-- 1. User Management Content -->
                 <section class="card tab-pane active" id="userManagementContent">
-                    <!-- ... your user management content ... -->
+                    <div class="card-header"><h3>Registered Users</h3><p>View and manage all users on the platform.</p></div>
+                    <div class="user-table"><div class="table-header"><span>First Name</span><span>Last Name</span><span>Email</span><span>Phone</span><span>Country</span><span>Registration Date</span><span>Status</span><span>Actions</span></div><div class="empty-state">No users found. New signups will appear here.</div></div>
                 </section>
 
-                <!-- All Transactions Content (Unchanged) -->
+                <!-- 2. All Transactions Content -->
                 <section class="tab-pane" id="allTransactionsContent">
-                    <!-- ... your all transactions content ... -->
+                    <div class="page-header"><h3>All Transactions</h3><p>A log of all data bundle purchases and wallet top-ups.</p></div>
+                    <div class="card"><div class="transactions-table"><div class="table-header"><span>User</span><span>Type</span><span>Details</span><span>Amount</span><span>Date</span><span>Status</span></div><div class="table-body"><div class="table-row"><span>John Doe</span><span>MTN</span><span>5GB</span><span>GH₵20.00</span><span>8/26/2025, 10:58:20 PM</span><span><span class="status-badge status-completed">Completed</span></span></div><div class="table-row"><span>Jane Smith</span><span>Telecel</span><span>1GB</span><span>GH₵5.00</span><span>8/26/2025, 10:58:20 PM</span><span><span class="status-badge status-failed">Failed</span></span></div></div></div></div>
                 </section>
 
-                <!-- 3. Data Bundles Content (THIS IS THE CORRECTED SECTION) -->
+                <!-- 3. Data Bundles Content -->
                 <section class="tab-pane data-bundles-grid" id="dataBundlesContent">
-                    <div class="bundle-card">
-                        <div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p class="bundle-description">Manage data bundles for MTN.</p></div>
-                        <div class="bundle-table">
-                            <div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div>
-                            <div class="table-body"><!-- The admin-dashboard.js script will fill this part --></div>
-                        </div>
-                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
-                    </div>
-                    <div class="bundle-card">
-                        <div class="bundle-card-header"><h3 class="bundle-title airteltigo"><i class="fas fa-circle"></i> AirtelTigo</h3><p class="bundle-description">Manage data bundles for AirtelTigo.</p></div>
-                        <div class="bundle-table">
-                            <div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div>
-                            <div class="table-body"><!-- The admin-dashboard.js script will fill this part --></div>
-                        </div>
-                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
-                    </div>
-                    <div class="bundle-card">
-                        <div class="bundle-card-header"><h3 class="bundle-title telecel"><i class="fas fa-circle"></i> Telecel</h3><p class="bundle-description">Manage data bundles for Telecel.</p></div>
-                        <div class="bundle-table">
-                            <div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div>
-                            <div class="table-body"><!-- The admin-dashboard.js script will fill this part --></div>
-                        </div>
-                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
-                    </div>
+                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p class="bundle-description">Manage data bundles for MTN.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>1GB</span><span>5.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div><div class="table-row"><span>5GB</span><span>20.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
+                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title airteltigo"><i class="fas fa-circle"></i> AirtelTigo</h3><p class="bundle-description">Manage data bundles for AirtelTigo.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>2GB</span><span>10.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
+                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title telecel"><i class="fas fa-circle"></i> Telecel</h3><p class="bundle-description">Manage data bundles for Telecel.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>10GB</span><span>30.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
                 </section>
 
-                <!-- API Settings, Support, and API Docs Content (Unchanged) -->
+                <!-- 4. API Settings Content -->
                 <section class="card tab-pane" id="apiSettingsContent">
-                    <!-- ... your full API settings content ... -->
+                    <div class="card-header"><h3>API & Payment Settings</h3><p>These keys are managed in your project's environment file (.env) for security.</p></div>
+                    <div class="settings-list"><div class="setting-item"><div><h4>Transaction Forwarding</h4><p>API token for the main website.</p><span class="setting-label">API Token</span></div><span class="status-text"><i class="fas fa-check-circle"></i> Set in environment file</span></div><div class="setting-item"><div><h4>Paystack Payment Gateway</h4><p>Live keys for processing payments.</p><span class="setting-label">Paystack Public Key</span></div><span class="status-text"><i class="fas fa-check-circle"></i> Set in environment file</span></div><div class="setting-item"><div><span class="setting-label">Paystack Secret Key</span></div><span class="status-text"><i class="fas fa-check-circle"></i> Set in environment file</span></div></div>
+                    <div class="card-footer"><p>To change these values, you must edit the .env file and restart the application.</p></div>
                 </section>
-                <section class="tab-pane support-grid" id="supportContent">
-                    <!-- ... your full Support settings content ... -->
-                </section>
+                
+                <!-- 5. Support Content -->
+                <!-- 5. Support Content -->
+<section class="tab-pane support-grid" id="supportContent">
+    <div class="card">
+        <div class="card-header"><h3>Support Settings</h3><p>Configure links for customer support channels.</p></div>
+        <!-- Add an ID to the form -->
+        <form class="form-group" id="support-settings-form">
+            <label>WhatsApp Support Link</label>
+            <!-- Add an ID to the input -->
+            <input type="text" id="whatsapp-link-input">
+            <p class="input-description">This link will be shown to users to contact support.</p>
+        </form>
+        <button class="save-btn" id="save-support-btn">Save Changes</button>
+    </div>
+     <div class="card">
+        <div class="card-header"><h3>Verify Email Configuration</h3><p>Send a test email...</p></div>
+        <!-- Add an ID to the form -->
+        <form class="form-group" id="test-email-form">
+            <label>Recipient Email Address</label>
+            <!-- Add an ID to the input -->
+            <input type="email" id="test-email-input" placeholder="you@example.com">
+            <p class="input-description">The address to send the test email to.</p>
+        </form>
+        <button class="save-btn" id="send-test-email-btn">Send Test Email</button>
+    </div>
+</section>
+                <!-- 6. API Docs Content -->
                 <section class="tab-pane api-docs-grid" id="apiDocsContent">
-                    <!-- ... your full API Docs content ... -->
+                    <div class="card"><div class="card-header"><h3>API Dashboard</h3><p>Your credentials and endpoint for the transaction API.</p></div><div class="api-item"><span>Your Token</span><div class="code-box"><span>Efrhde3rtvVUikQ1PyfskN7dQtTlo7bTH</span><button>Copy</button></div></div><div class="api-item"><span>Status</span><span class="status-badge status-pending">Pending</span></div><div class="api-item"><span>Endpoint</span><span class="endpoint-url">https://rkstores.com/wp-json/rkapi/v1/purchase</span></div></div>
+                    <div class="card api-documentation"><h3>MTN Bundle API Documentation</h3><h4>Authentication</h4><p>Send your API token in the header like this:</p><pre><code>rk-api-token: YOUR_API_TOKEN</code></pre><h4>Method</h4><pre><code>POST</code></pre><h4>Parameters</h4><table class="params-table"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>recipient</td><td>string</td><td>MTN phone number...</td></tr><tr><td>package_size</td><td>string</td><td>Bundle size in MB...</td></tr></tbody></table><h4>Example cURL</h4><pre><code>curl -X POST https://.../purchase ...</code></pre><h4>Success Response</h4><pre><code>{ "success": true, ... }</code></pre><h4>Error Responses</h4><table class="params-table error-table"><thead><tr><th>Status Code</th><th>Error</th><th>Description</th></tr></thead><tbody><tr><td><span class="status-code sc-401">401</span></td><td>Unauthorized</td><td>API token missing</td></tr><tr><td><span class="status-code sc-403">403</span></td><td>Forbidden</td><td>API not approved</td></tr></tbody></table></div>
                 </section>
+                
             </div>
 
-            <!-- Modal for Adding/Editing Bundles (Unchanged) -->
-            <div class="modal-overlay" id="bundle-modal" hidden>
-                <!-- ... your full modal content ... -->
+
+            <!-- MODAL FOR ADDING/EDITING BUNDLES -->
+<div class="modal-overlay" id="bundle-modal" hidden>
+    <div class="modal-content">
+        <h3 id="modal-title">Add New Bundle</h3>
+        <form id="bundle-form">
+            <!-- This hidden input will store the bundle ID when editing -->
+            <input type="hidden" id="bundle-id">
+            
+            <div class="form-group-modal">
+                <label for="bundle-provider">Provider</label>
+                <select id="bundle-provider" required>
+                    <option value="MTN">MTN</option>
+                    <option value="Telecel">Telecel</option>
+                    <option value="AirtelTigo">AirtelTigo</option>
+                </select>
             </div>
+            <div class="form-group-modal">
+                <label for="bundle-volume">Volume (e.g., 5GB)</label>
+                <input type="text" id="bundle-volume" required>
+            </div>
+            <div class="form-group-modal">
+                <label for="bundle-price">Price (GH₵)</label>
+                <input type="number" step="0.01" id="bundle-price" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="cancel-btn">Cancel</button>
+                <button type="submit" id="save-btn">Save Bundle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
         </main>
     </div>
    
-    <!-- Script Tags (Unchanged) -->
+    <!-- admin-script.js is in the SAME 'Public' folder -->
     <script src="main.js"></script> 
+
+    <!-- admin-dashboard.js is in the SAME 'Public' folder -->
     <script src="admin-dashboard.js"></script>
+<!-- ... your existing script tags are here ... -->
 </body>
 </html>
+
+

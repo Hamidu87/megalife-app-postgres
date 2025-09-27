@@ -444,17 +444,16 @@ app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
 });
 
 // UPDATE a bundle
-// UPDATE a bundle (Final PostgreSQL Version)
 app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { provider, volume, price } = req.body; // Also get provider
-        if (!provider || !volume || !price) {
-            return res.status(400).json({ message: 'All fields are required.' });
+        const { volume, price } = req.body;
+        if (!volume || !price) {
+            return res.status(400).json({ message: 'Volume and price are required.' });
         }
         await db.query(
-            'UPDATE bundles SET provider = $1, volume = $2, price = $3 WHERE id = $4',
-            [provider, volume, price, id]
+            'UPDATE bundles SET volume = $1, price = $2 WHERE id = $3',
+            [volume, price, id]
         );
         res.status(200).json({ message: 'Bundle updated successfully.' });
     } catch (error) {
@@ -463,14 +462,17 @@ app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     }
 });
 
-// DELETE a bundle (Final PostgreSQL Version)
-app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
+// DELETE a bundle
+// READ all bundles (Final PostgreSQL Version)
+app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const { id } = req.params;
-        await db.query('DELETE FROM bundles WHERE id = $1', [id]);
-        res.status(200).json({ message: 'Bundle deleted successfully.' });
+        // Use result.rows for PostgreSQL
+        const result = await db.query('SELECT * FROM bundles ORDER BY provider, price');
+        const bundles = result.rows;
+        
+        res.status(200).json(bundles);
     } catch (error) {
-        console.error('Error deleting bundle:', error);
+        console.error('Error fetching bundles:', error);
         res.status(500).json({ message: 'Server error.' });
     }
 });

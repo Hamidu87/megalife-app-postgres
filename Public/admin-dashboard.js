@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+
     // Modal Form Logic
     if (cancelBtn) cancelBtn.addEventListener('click', closeBundleModal);
     if (bundleForm) bundleForm.addEventListener('submit', handleBundleFormSubmit);

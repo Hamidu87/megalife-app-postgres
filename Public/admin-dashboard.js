@@ -1,5 +1,5 @@
 
-/*
+
 document.addEventListener('DOMContentLoaded', () => {
     // This script handles ALL logic for the admin dashboard page.
 
@@ -56,64 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'supportContent') fetchAllSettings();
         });
     });
-
-*/
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    // This is the master script for the ENTIRE admin dashboard.
-
-    const isAdminDashboardPage = document.querySelector('.admin-container');
-    if (!isAdminDashboardPage) return;
-    
-    const token = localStorage.getItem('admin_token');
-    if (!token) { window.location.href = 'admin-login.html'; return; }
-
-    // --- GET UI ELEMENTS & SETUP LISTENERS ---
-    // ... (Your existing code to get elements and set up listeners for logout, modal, etc.)
-
-    // --- TAB SWITCHING LOGIC (FINAL VERSION) ---
-    const tabs = document.querySelectorAll('.content-tabs .tab-item');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function (event) {
-            event.preventDefault();
-            // ... (Your working tab switching logic for visuals)
-
-            // THIS IS THE KEY: Call the correct data-loading function for each tab
-            const targetId = this.getAttribute('data-target');
-            if (targetId === 'userManagementContent') fetchAllUsers();
-            else if (targetId === 'allTransactionsContent') fetchAllTransactions();
-            else if (targetId === 'dataBundlesContent') fetchAllBundles();
-            else if (targetId === 'supportContent') fetchAllSettings();
-            // API Settings and API Docs are static, they don't need a fetch function.
-        });
-    });
-
-
-    // --- 1. SECURITY CHECK ---
-    if (!token) {
-        window.location.href = 'admin-login.html';
-        return;
-    }
-
-
-
-
-// Logout Logic
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('admin_token');
-            window.location.href = 'admin-login.html';
-        });
-    }
-
-
 
     // Modal Form Logic
     if (cancelBtn) cancelBtn.addEventListener('click', closeBundleModal);

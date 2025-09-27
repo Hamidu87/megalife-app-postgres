@@ -95,6 +95,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    // --- 1. SECURITY CHECK ---
+    if (!token) {
+        window.location.href = 'admin-login.html';
+        return;
+    }
+
+
+
+
+// Logout Logic
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('admin_token');
+            window.location.href = 'admin-login.html';
+        });
+    }
 
 
 

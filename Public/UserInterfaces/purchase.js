@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const allBundles = await response.json();
             const providerBundles = allBundles.filter(bundle => bundle.provider === provider);
 
-            bundleSelect.innerHTML = '<option value="" data-price="0">-- Select a Bundle --</option>';
+            bundleSelect.innerHTML = '<option value="" data-price="0"> Select a Bundle </option>';
 
             providerBundles.forEach(bundle => {
                 if (bundle.volume && bundle.price) {

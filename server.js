@@ -188,12 +188,14 @@ app.post('/verify-email', async (req, res) => {
 
 // GET ALL ACTIVE BUNDLES (for user purchase pages)
 // This is the final, correct version for PostgreSQL
+// GET ALL ACTIVE BUNDLES (Final PostgreSQL Version)
 app.get('/bundles', async (req, res) => {
     try {
+        // CORRECTED QUERY: Uses PostgreSQL syntax and double quotes
         const result = await db.query(
             'SELECT * FROM bundles WHERE "isActive" = true ORDER BY provider, price'
         );
-        // The data is in the 'rows' property for PostgreSQL
+        // CORRECTED: Sends the data from result.rows
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching active bundles:', error);

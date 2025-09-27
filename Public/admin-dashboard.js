@@ -1,5 +1,5 @@
 
-/*
+
 document.addEventListener('DOMContentLoaded', () => {
     // This script handles ALL logic for the admin dashboard page.
 
@@ -333,13 +333,13 @@ async function fetchAllTransactions() {
     fetchAllUsers();
 });
 
-*/
 
 
 
 
 
 
+/*
 
 document.addEventListener('DOMContentLoaded', () => {
     // This script handles ALL logic for the admin dashboard page.
@@ -674,3 +674,6 @@ async function fetchAllTransactions() {
     fetchAllUsers();
 });
 
+
+
+*/

@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ... inside handleDynamicClicks ...
     async function handleDynamicClicks(e) {
         if (e.target.closest('.add-bundle-btn')) {
             console.log("Add Bundle button was clicked!");
@@ -163,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Edit button was clicked!");
             const id = editBtn.closest('.table-row').dataset.id;
             try {
-                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+                const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}`,'Cache-Control': 'no-cache' } });
                 const bundles = await response.json();
                 const bundleToEdit = bundles.find(b => b.id == id);
                 if (bundleToEdit) openBundleModal(bundleToEdit);
@@ -292,7 +293,7 @@ async function fetchAllTransactions() {
         const bundlesContainer = document.querySelector('#dataBundlesContent');
         if (!bundlesContainer) return;
         try {
-            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}`,'Cache-Control': 'no-cache' } });
             if (!response.ok) throw new Error('Failed to fetch bundles from server.');
             const bundles = await response.json();
             console.log("Bundles fetched successfully:", bundles);

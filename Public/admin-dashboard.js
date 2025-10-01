@@ -298,48 +298,44 @@ async function fetchAllTransactions() {
 
     // THIS IS THE CORRECTED FUNCTION
     async function fetchAllBundles() {
-        console.log("Fetching all bundles to refresh display...");
-        const bundlesContainer = document.querySelector('#dataBundlesContent');
-        if (!bundlesContainer) return;
-        try {
-            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}`,'Cache-Control': 'no-cache' } });
-            if (!response.ok) throw new Error('Failed to fetch bundles from server.');
-            const bundles = await response.json();
-            console.log("Bundles fetched successfully:", bundles);
-            const bundlesByProvider = { MTN: [], AirtelTigo: [], Telecel: [] };
-            bundles.forEach(bundle => {
-                if (bundlesByProvider[bundle.provider]) {
-                    bundlesByProvider[bundle.provider].push(bundle);
-                }
-            });
-            ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
-                const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
-                const tableBody = card.querySelector('.bundle-table .table-body');
-                if (tableBody) {
-                    tableBody.innerHTML = '';
-                    const providerBundles = bundlesByProvider[provider];
-                    if (providerBundles && providerBundles.length > 0) {
-                        providerBundles.forEach(bundle => {
-                            tableBody.innerHTML += `
-                                <div class="table-row" data-id="${bundle.id}">
-                                    <span>${bundle.volume}</span>
-                                    <span>${parseFloat(bundle.price).toFixed(2)}</span>
-                                    <div class="actions">
-                                        <i class="fas fa-edit action-edit"></i>
-                                        <i class="fas fa-trash action-delete"></i>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                }
-            });
+    const bundlesContainer = document.querySelector('#dataBundlesContent');
+    if (!bundlesContainer) return;
+    try {
+        const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' }
+        });
+        if (!response.ok) throw new Error('Failed to fetch bundles.');
+        const bundles = await response.json();
+        
+        const bundlesByProvider = { MTN: [], AirtelTigo: [], Telecel: [] };
+        bundles.forEach(bundle => { if (bundlesByProvider[bundle.provider]) bundlesByProvider[bundle.provider].push(bundle); });
 
+        ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
+            const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
+            if (card) {
+                const tableBody = card.querySelector('.bundle-table .table-body');
+                tableBody.innerHTML = '';
+                const providerBundles = bundlesByProvider[provider];
+                if (providerBundles && providerBundles.length > 0) {
+                    providerBundles.forEach(bundle => {
+                        // THIS IS THE CRITICAL FIX: Ensure data-id="${bundle.id}" is present and correct
+                        tableBody.innerHTML += `
+                            <div class="table-row" data-id="${bundle.id}">
+                                <span>${bundle.volume}</span>
+                                <span>${parseFloat(bundle.price).toFixed(2)}</span>
+                                <div class="actions">
+                                    <i class="fas fa-edit action-edit" title="Edit"></i>
+                                    <i class="fas fa-trash action-delete" title="Delete"></i>
+                                </div>
+                            </div>`;
+                    });
+                }
+            }
+        });
+    } catch (error) { console.error('Error fetching/rendering bundles:', error); }
+}
           
-            console.log("Bundle display refreshed successfully.");
-        } catch (error) { 
-            console.error('Error fetching and rendering bundles:', error); 
-        }
-    }
+        
 
     // --- INITIALIZE THE DASHBOARD ---
     console.log("Step 8: Initializing dashboard by fetching users.");

@@ -416,10 +416,11 @@ app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
 
 
 
+// READ all bundles
 app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const [bundles] = await db.query('SELECT * FROM bundles ORDER BY provider, price');
-        res.status(200).json(bundles);
+        const result = await db.query('SELECT * FROM bundles ORDER BY provider, price');
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching bundles:', error);
         res.status(500).json({ message: 'Server error.' });
@@ -430,43 +431,26 @@ app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
 app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
         const { provider, volume, price } = req.body;
-        if (!provider || !volume || !price) {
-            return res.status(400).json({ message: 'Provider, volume, and price are required.' });
-        }
-        await db.query(
-            'INSERT INTO bundles (provider, volume, price) VALUES ($1, $2, $3)',
-            [provider, volume, price]
-        );
+        await db.query('INSERT INTO bundles (provider, volume, price) VALUES ($1, $2, $3)', [provider, volume, price]);
         res.status(201).json({ message: 'Bundle created successfully.' });
-    } catch (error) {
-        console.error('Error creating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
+    } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });
 
 // UPDATE a bundle
 app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { volume, price } = req.body;
-        if (!volume || !price) {
-            return res.status(400).json({ message: 'Volume and price are required.' });
-        }
-        await db.query(
-            'UPDATE bundles SET volume = $1, price = $2 WHERE id = $3',
-            [volume, price, id]
-        );
+        const { provider, volume, price } = req.body;
+        await db.query('UPDATE bundles SET provider = $1, volume = $2, price = $3 WHERE id = $4', [provider, volume, price, id]);
         res.status(200).json({ message: 'Bundle updated successfully.' });
-    } catch (error) {
-        console.error('Error updating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
+    } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });
 
 // DELETE a bundle
 app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
+        if (!id || id === 'undefined') return res.status(400).json({ message: 'Invalid bundle ID.' });
         await db.query('DELETE FROM bundles WHERE id = $1', [id]);
         res.status(200).json({ message: 'Bundle deleted successfully.' });
     } catch (error) {

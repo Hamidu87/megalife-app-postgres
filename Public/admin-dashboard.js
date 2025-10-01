@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
    // Function to fetch and display ALL TRANSACTIONS (Corrected)
+// Function to fetch and display ALL TRANSACTIONS (Final Corrected Version)
 async function fetchAllTransactions() {
     const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
     if (!transTableContainer) return;
@@ -227,39 +228,41 @@ async function fetchAllTransactions() {
 
     try {
         const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Cache-Control': 'no-cache'
+            }
         });
         if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
         
         const transactions = await response.json();
         
-        // 1. ADD "RECIPIENT" TO THE TABLE HEADER
+        // Start building the HTML. Start with the header.
         let tableHTML = `
             <div class="table-header">
                 <span>User</span>
                 <span>Type</span>
                 <span>Details</span>
-                <span>Recipient</span> <!-- NEW COLUMN -->
+                <span>Recipient</span>
                 <span>Amount</span>
                 <span>Date</span>
                 <span>Status</span>
             </div>
-            <div class="table-body">`;
+            <div class="table-body">`; // Open a container for the rows
 
         if (transactions.length > 0) {
             transactions.forEach(tx => {
                 const transDate = new Date(tx.transactionsDate).toLocaleString();
-                let statusBadgeClass = 'status-completed';
+                let statusBadgeClass = 'status-completed'; // Default
                 if (tx.status.toLowerCase() === 'failed') statusBadgeClass = 'status-failed';
                 if (tx.status.toLowerCase() === 'pending') statusBadgeClass = 'status-pending';
 
-                // 2. ADD THE RECIPIENT DATA TO THE TABLE ROW
                 tableHTML += `
                     <div class="table-row">
                         <span>${tx.fullName || 'N/A'}</span>
                         <span>${tx.type}</span>
                         <span>${tx.details}</span>
-                        <span>${tx.recipient || 'N/A'}</span> <!-- NEW DATA CELL -->
+                        <span>${tx.recipient || 'N/A'}</span>
                         <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
                         <span>${transDate}</span>
                         <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
@@ -267,15 +270,16 @@ async function fetchAllTransactions() {
                 `;
             });
         } else {
+            // If there are no transactions, add the empty state message inside the body
             tableHTML += `<div class="empty-state">No transactions found.</div>`;
         }
 
-        tableHTML += `</div>`;
-        transTableContainer.innerHTML = tableHTML;
+        tableHTML += `</div>`; // Close the body container
+        transTableContainer.innerHTML = tableHTML; // Replace the entire content at once
 
     } catch (error) {
         console.error('Failed to fetch transactions:', error);
-        transTableContainer.innerHTML = '<div class="empty-state">Failed to load transactions.</div>';
+        transTableContainer.innerHTML = `<div class="empty-state">Failed to load transactions.</div>`;
     }
 }
     // NEW FUNCTION for fetching settings

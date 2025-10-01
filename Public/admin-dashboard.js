@@ -146,12 +146,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             console.log("Bundle saved successfully!");
             closeBundleModal();
+
+            console.log("About to call fetchAllBundles() after saving..."); // DEBUG
+    fetchAllBundles(); // Refresh the list
+
             fetchAllBundles();
         } catch (error) {
             console.error('Error saving bundle:', error);
             alert(`Error: ${error.message}`);
         }
     }
+
 
     // ... inside handleDynamicClicks ...
     async function handleDynamicClicks(e) {
@@ -173,10 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteBtn = e.target.closest('.action-delete');
         if (deleteBtn) {
             console.log("Delete button was clicked!");
-            if (confirm('Are you sure you want to delete this bundle?')) {
+            if (confirm('Are you sure you want to delete this bundle?')) 
+                {
                 const id = deleteBtn.closest('.table-row').dataset.id;
+
                 try {
                     await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    console.log("About to call fetchAllBundles() after deleting..."); // DEBUG
+        fetchAllBundles(); // Refresh
                     fetchAllBundles();
                 } catch (error) { console.error('Failed to delete bundle:', error); }
             }
@@ -324,6 +333,8 @@ async function fetchAllTransactions() {
                     }
                 }
             });
+
+          
             console.log("Bundle display refreshed successfully.");
         } catch (error) { 
             console.error('Error fetching and rendering bundles:', error); 

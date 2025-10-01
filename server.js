@@ -403,14 +403,21 @@ app.get('/admin/users', authenticateAdmin, async (req, res) => {
     }
 });
      // GET ALL TRANSACTIONS
+// GET ALL TRANSACTIONS (Final PostgreSQL Version)
 app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
     try {
-        const query = `SELECT t.*, u."fullName" FROM transactions t JOIN users u ON t."userId" = u.id ORDER BY t."transactionsDate" DESC`;
-        const [transactions] = await db.query(query);
-        res.status(200).json(transactions);
+        const query = `
+            SELECT t.*, u."fullName" 
+            FROM transactions t 
+            JOIN users u ON t."userId" = u.id 
+            ORDER BY t."transactionsDate" DESC
+        `;
+        // THIS IS THE CORRECT PATTERN
+        const result = await db.query(query);
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching all transactions:', error);
-        res.status(500).json({ message: 'Server error.' });
+        res.status(500).json({ message: 'Server error while fetching transactions.' });
     }
 });
 

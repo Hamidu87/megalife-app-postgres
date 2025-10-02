@@ -1811,40 +1811,15 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
 
-#profile-pic {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-/* ... (Your other user-profile styles are fine) ... */
+
+
 
 /* Container for the logout link */
 .sidebar-actions {
     margin-bottom: 15px;
 }
 
-.logout-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    text-decoration: none;
-    color: var(--error-color, #D32F2F); /* Use error color variable */
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-.logout-link:hover {
-    background-color: #f8d7da;
-}
 
 /* The final copyright text */
 .footer-copyright {

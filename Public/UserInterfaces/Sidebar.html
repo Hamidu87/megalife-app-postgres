@@ -12,7 +12,6 @@
     </ul>
     <p class="nav-category">HISTORY</p>
     <ul>
-        <!-- THIS 'has-submenu' CLASS IS CRITICAL -->
         <li class="has-submenu">
             <a href="#">
                 <i class="fas fa-history"></i>
@@ -28,21 +27,16 @@
     </ul>
     <p class="nav-category">ACTION</p>
     <ul>
-        <li class="whatsapp-link"><a href="..."><i class="fab fa-whatsapp"></i><span>Join WhatsApp Group</span></a></li>
+        <li class="whatsapp-link"><a href="https://wa.me/YOURNUMBER"><i class="fab fa-whatsapp"></i><span>Join WhatsApp Group</span></a></li>
     </ul>
 </nav>
 
+<!-- This is the complete and corrected footer section -->
 <div class="sidebar-footer">
     <div class="user-profile">
-        <!-- ... your user profile html ... -->
-         <div class="profile-pic-container">
-            <!-- This is the profile picture that will be displayed -->
+        <div class="profile-pic-container">
             <img src="../assets/images/default-avatar.png" id="profile-pic" alt="User Profile">
-            
-            <!-- This is the hidden file input that the user clicks -->
             <input type="file" id="file-upload" accept="image/*" style="display: none;">
-            
-            <!-- This label is the visible "camera" icon that triggers the file input -->
             <label for="file-upload" class="upload-overlay">
                 <i class="fas fa-camera"></i>
             </label>
@@ -52,12 +46,17 @@
             <p class="user-email" id="sidebar-user-email">Loading...</p>
         </div>
     </div>
-    <!-- The logout link is now part of the footer -->
-    <div class="logout-link">
-        <a href="../login.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    
+    <!-- Logout link with corrected class for JS -->
+    <div class="sidebar-actions">
+        <a href="../login.html" class="logout-link">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
     </div>
-   
-</div>   
 
-
-
+    <!-- The new copyright notice -->
+    <div class="footer-copyright">
+        <p>&copy; 2025 Megalifeconsult. All Rights Reserved.</p>
+    </div>
+</div>

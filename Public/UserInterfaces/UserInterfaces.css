@@ -1802,9 +1802,8 @@ body {
 
 /* This rule ensures the nav section grows and pushes the footer to the bottom */
 .sidebar-nav {
-    flex-grow: 1;
+    padding: 0 15px;
 }
-
 /* The main container for the footer content */
 .sidebar-footer {
     padding: 15px;

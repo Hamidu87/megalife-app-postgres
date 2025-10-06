@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!transTableContainer) return;
         transTableContainer.innerHTML = '<div class="empty-state">Loading...</div>';
         try {
-            const response = await fetch(`http://localhost:3000/admin/transactions`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/transactions`, { headers: { 'Authorization': `Bearer ${token}` } });
             const transactions = await response.json();
             let tableHTML = `<div class="table-header">...<span>Actions</span></div>`; // Add Actions header
             if (transactions.length > 0) {

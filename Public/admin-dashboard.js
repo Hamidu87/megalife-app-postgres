@@ -38,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
+
+
+
+
+
     // Tab Switching Logic
     tabs.forEach(tab => {
         tab.addEventListener('click', function (event) {
@@ -102,6 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+
+
+
+
+
+    
+
+
+
+
 // --- FUNCTIONS ---
 
     function openBundleModal(bundle = null) {
@@ -158,6 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+
+
+
+
+
+    
+
+
+
+
     // ... inside handleDynamicClicks ...
     async function handleDynamicClicks(e) {
         if (e.target.closest('.add-bundle-btn')) {
@@ -191,6 +218,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+
+
+    
+
+
+
     // --- DATA FETCHING FUNCTIONS ---
     async function fetchAllUsers() {
         const userTableContainer = document.querySelector('#userManagementContent .user-table');
@@ -206,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (users.length > 0) {
                 users.forEach(user => {
                     const registrationDate = new Date(user.registrationDate).toLocaleString();
-                    tableHTML += `<div class="table-row"><span>${user.fullName}</span><span>${user.email}</span><span>${user.telephone || 'N/A'}</span><span>${user.country || 'N/A'}</span><span>GH₵ ${parseFloat(user.walletBalance).toFixed(2)}</span><span>${registrationDate}</span><span><span class="status-badge status-active">Active</span></span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div>`;
+                    tableHTML += `<div class="table-row" data-id="${user.id}"> <span>${user.fullName}</span> <span>${user.email}</span><span>${user.telephone || 'N/A'}</span><span>${user.country || 'N/A'}</span><span>GH₵ ${parseFloat(user.walletBalance).toFixed(2)}</span><span>${registrationDate}</span><span><span class="status-badge status-active">Active</span></span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div>`;
                 });
             } else {
                 tableHTML += `<div class="empty-state">No users found.</div>`;
@@ -220,55 +254,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
    // Function to fetch and display ALL TRANSACTIONS (Corrected)
 // Function to fetch and display ALL TRANSACTIONS (Final Corrected Version)
-async function fetchAllTransactions() {
-    const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
-    if (!transTableContainer) return;
-    
-    transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
 
-    try {
-        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Cache-Control': 'no-cache'
-            }
-        });
-        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-        
-        const transactions = await response.json();
-        
-        // Start building the HTML. Start with the header.
-        let tableHTML = `
-            <div class="table-header">
-                <span>User</span>
-                <span>Type</span>
-                <span>Details</span>
-                <span>Recipient</span>
-                <span>Amount</span>
-                <span>Date</span>
-                <span>Status</span>
-            </div>
-            <div class="table-body">`; // Open a container for the rows
-
-        if (transactions.length > 0) {
-            transactions.forEach(tx => {
-                const transDate = new Date(tx.transactionsDate).toLocaleString();
-                let statusBadgeClass = 'status-completed'; // Default
-                if (tx.status.toLowerCase() === 'failed') statusBadgeClass = 'status-failed';
-                if (tx.status.toLowerCase() === 'pending') statusBadgeClass = 'status-pending';
-
-                tableHTML += `
-                    <div class="table-row">
-                        <span>${tx.fullName || 'N/A'}</span>
-                        <span>${tx.type}</span>
-                        <span>${tx.details}</span>
-                        <span>${tx.recipient || 'N/A'}</span>
-                        <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
-                        <span>${transDate}</span>
-                        <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
-                    </div>
-                `;
-            });
+    async function fetchAllTransactions() {
+        const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
+        if (!transTableContainer) return;
+        transTableContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+        try {
+            const response = await fetch(`http://localhost:3000/admin/transactions`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const transactions = await response.json();
+            let tableHTML = `<div class="table-header">...<span>Actions</span></div>`; // Add Actions header
+            if (transactions.length > 0) {
+                transactions.forEach(tx => {
+                    let actionButton = '';
+                    if (tx.status !== 'Completed') {
+                        actionButton = `<button class="forward-btn" data-id="${tx.id}">Forward Now</button>`;
+                    }
+                    tableHTML += `<div class="table-row" data-id="${tx.id}">...<span>${actionButton}</span></div>`; // Add button cell
+                });
         } else {
             // If there are no transactions, add the empty state message inside the body
             tableHTML += `<div class="empty-state">No transactions found.</div>`;

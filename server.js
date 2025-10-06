@@ -402,6 +402,34 @@ app.get('/admin/users', authenticateAdmin, async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 });
+
+
+// MANUALLY FORWARD A TRANSACTION
+app.post('/admin/transactions/:id/forward', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [transactions] = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
+        if (transactions.length === 0) {
+            return res.status(404).json({ message: 'Transaction not found.' });
+        }
+
+        // Call our existing forwarder function
+        await forwardTransaction(transactions[0]);
+        
+        // Update the status to show it's completed
+        await db.query("UPDATE transactions SET status = 'Completed' WHERE id = $1", [id]);
+
+        res.status(200).json({ message: 'Transaction has been manually forwarded successfully.' });
+
+    } catch (error) {
+        console.error('Manual forward failed:', error);
+        // If it fails, mark it as Failed
+        await db.query("UPDATE transactions SET status = 'Failed' WHERE id = $1", [req.params.id]);
+        res.status(500).json({ message: 'Failed to forward transaction.' });
+    }
+});
+
+
      // GET ALL TRANSACTIONS
 // GET ALL TRANSACTIONS (Final PostgreSQL Version)
 app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
@@ -420,6 +448,45 @@ app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
         res.status(500).json({ message: 'Server error while fetching transactions.' });
     }
 });
+
+
+
+
+// UPDATE A USER'S DETAILS
+app.put('/admin/users/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { fullName, email, telephone, country } = req.body;
+        if (!fullName || !email) {
+            return res.status(400).json({ message: 'Full name and email are required.' });
+        }
+        await db.query(
+            'UPDATE users SET "fullName" = $1, email = $2, telephone = $3, country = $4 WHERE id = $5',
+            [fullName, email, telephone, country, id]
+        );
+        res.status(200).json({ message: 'User updated successfully.' });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+// DELETE A USER
+app.delete('/admin/users/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Optional: You might want to delete their transactions too, or keep them for records.
+        // For now, we will just delete the user.
+        await db.query('DELETE FROM users WHERE id = $1', [id]);
+        res.status(200).json({ message: 'User deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+
+
 
 
 

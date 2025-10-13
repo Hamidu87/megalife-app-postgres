@@ -28,7 +28,7 @@
     --text-light: #6C757D;
     /* CHANGE THIS LINE to your new color choice */
     --background-color: #F4F7FC; 
-    --card-background: #ffffff;
+    --card-background: #5199d5;
      --success-color: #28a745;
     --error-color: #dc3545;
     --font-family: 'Poppins', sans-serif;
@@ -46,15 +46,19 @@
     box-sizing: border-box;
 }
 
+/* Find and replace your existing body rule */
 body {
     font-family: var(--font-family);
     background-color: var(--background-color);
+    color: var(--text-dark);
+    
+    /* NEW: Robust Centering */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    color: var(--text-dark);
-    padding: 20px 0;
+    padding: 20px; /* Add padding for small screen edges */
 }
 
 /* --- Login/Signup Container & Card --- */

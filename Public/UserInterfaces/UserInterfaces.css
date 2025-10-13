@@ -1242,6 +1242,7 @@ body {
 }
 
 
+
 /* ---                                    Order Histories.css                                   --- */
 
 /* --- Add these new styles to the BOTTOM of your existing style.css file --- */
@@ -1408,7 +1409,12 @@ body {
     font-weight: 600;
     font-size: 16px;
 }
-
+/* This will center the main content on pages where it's needed */
+.main-content.centered-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 
 

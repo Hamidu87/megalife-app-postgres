@@ -1235,7 +1235,11 @@ body {
 }
 
 
-
+/* --- FIX for Top Up History Table Layout --- */
+#topup-history-table {
+    max-width: 900px; /* Set a max width */
+    margin: 0 auto; /* Center the table on the page */
+}
 
 
 /* ---                                    Order Histories.css                                   --- */
@@ -1829,4 +1833,15 @@ body {
 .footer-copyright p {
     font-size: 11px;
     color: var(--text-muted);
+}
+
+
+/* --- FIX for Horizontally Scrolling Tables --- */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto; /* This is the magic line */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+}
+.history-table {
+    min-width: 800px; /* Set a minimum width for the table */
 }

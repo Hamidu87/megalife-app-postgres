@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Megalife - Bundle Order History</title>
+
    <link rel="icon" type="image/x-icon" href="../favicon.png.png?v=1.1">
     <!-- Make sure your CSS file is correctly linked -->
     <link rel="stylesheet" href="UserInterfaces.css"> 
@@ -23,6 +24,11 @@
             <header class="main-header"></header>
 
             <h2 class="page-title">My Bundle Order History</h2>
+            <div class="table-wrapper">
+    <div class="history-table" id="bundle-orders-table">
+        <div class="empty-state">Loading your orders...</div>
+    </div>
+</div>
             <div class="filter-bar">
                 <input type="text" placeholder="Search Order ID or Recipient">
                 <select>

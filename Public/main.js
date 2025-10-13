@@ -173,5 +173,38 @@ if (signupForm) {
     const isProtectedPage = window.location.pathname.includes('/UserInterfaces/');
     if (isProtectedPage) {
         // ... (This section is untouched)
+        // --- NEW: INACTIVITY LOGOUT TIMER ---
+        let inactivityTimer;
+
+        function resetInactivityTimer() {
+            // Clear the old timer
+            clearTimeout(inactivityTimer);
+            
+            // Set a new timer. 15 minutes is a good standard.
+            // 15 minutes * 60 seconds/minute * 1000 milliseconds/second
+            inactivityTimer = setTimeout(() => {
+                // If the timer finishes, the user has been inactive.
+                alert("You have been logged out due to inactivity.");
+                localStorage.clear();
+                window.location.href = '../login.html';
+            }, 15 * 60 * 1000); 
+        }
+
+        // Listen for any user activity on the page
+        window.addEventListener('mousemove', resetInactivityTimer);
+        window.addEventListener('mousedown', resetInactivityTimer);
+        window.addEventListener('keypress', resetInactivityTimer);
+        window.addEventListener('scroll', resetInactivityTimer);
+
+        // Start the timer when the page loads
+        resetInactivityTimer();
     }
+
+    
+
+
+
+    
 });
+
+

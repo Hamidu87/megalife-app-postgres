@@ -65,6 +65,8 @@ module.exports = { forwardTransaction };
 
 */
 
+
+/*
 const axios = require('axios');
 
 // This function will take a transaction from our database
@@ -97,6 +99,103 @@ async function forwardTransaction(transaction) {
         recipient: transaction.recipient,
         package_size: package_size,
         product: transaction.type.toLowerCase() // e.g., 'mtn', 'telecel'
+    };
+
+    // --- 3. Set up the request headers (CORRECTED) ---
+    const requestHeaders = {
+        'Content-Type': 'application/json', // CRITICAL: They expect JSON
+        'rk-api-token': EXTERNAL_RK_TOKEN
+    };
+
+    console.log('--- Sending the following CORRECTED data to RKStores ---');
+    console.log('URL:', EXTERNAL_API_URL);
+    console.log('Headers:', requestHeaders);
+    console.log('Body (JSON):', requestBody);
+    console.log('----------------------------------------------------');
+
+    // --- 4. Make the API call ---
+    try {
+        // Axios automatically sends the body as JSON when the header is set.
+        const response = await axios.post(EXTERNAL_API_URL, requestBody, { headers: requestHeaders });
+        
+        console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error(`❌ Failed to forward transaction ${transaction.id}.`);
+        if (error.response) {
+            console.error('--- RKSTORES API ERROR RESPONSE ---');
+            console.error('Status:', error.response.status);
+            console.error('Data:', error.response.data);
+            console.error('---------------------------------');
+        } else {
+            console.error('Network or other error:', error.message);
+        }
+        throw error;
+    }
+}
+
+module.exports = { forwardTransaction };
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+const axios = require('axios');
+
+// This function will take a transaction from our database
+// and forward it to the external API.
+async function forwardTransaction(transaction) {
+    console.log(`Forwarding transaction ID: ${transaction.id} to external API...`);
+
+    // --- 1. Get API Credentials from our .env file ---
+    const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL;
+    const EXTERNAL_RK_TOKEN = process.env.EXTERNAL_RK_TOKEN;
+
+    if (!EXTERNAL_API_URL || !EXTERNAL_RK_TOKEN) {
+        throw new Error("Missing external API configuration in .env file.");
+    }
+
+    // --- 2. Translate our data to their format (CORRECTED) ---
+    
+    // This logic to parse the GB from the details string is correct.
+    const detailsString = transaction.details || '';
+    const numberMatch = detailsString.match(/\d+(\.\d+)?/);
+    if (!numberMatch) {
+        throw new Error(`Could not parse a number from bundle details: "${detailsString}"`);
+    }
+    const bundleSizeInGB = parseFloat(numberMatch[0]);
+    const package_size = bundleSizeInGB * 1000; // Their system expects MB
+
+    // THIS IS THE CRITICAL FIX:
+    // This map translates our internal names to their required API names.
+    const productMap = {
+    'MTN': 'mtn',
+    'Telecel': 'telecel',
+    'AirtelTigo': 'at_bigtime' // NEW, CORRECTED value
+};
+
+    const product = productMap[transaction.type];
+    if (!product) {
+        throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);
+    }
+
+    // This is the data we will send as JSON.
+    const requestBody = {
+        recipient: transaction.recipient,
+        package_size: package_size,
+        product: product // Use the correctly mapped product name
     };
 
     // --- 3. Set up the request headers (CORRECTED) ---

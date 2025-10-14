@@ -154,12 +154,10 @@ module.exports = { forwardTransaction };
 
 const axios = require('axios');
 
-// This function will take a transaction from our database
-// and forward it to the external API.
+// This is the final, correct version of the function in apiForwarder.js
 async function forwardTransaction(transaction) {
     console.log(`Forwarding transaction ID: ${transaction.id} to external API...`);
-
-    // --- 1. Get API Credentials from our .env file ---
+    
     const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL;
     const EXTERNAL_RK_TOKEN = process.env.EXTERNAL_RK_TOKEN;
 
@@ -167,53 +165,41 @@ async function forwardTransaction(transaction) {
         throw new Error("Missing external API configuration in .env file.");
     }
 
-    // --- 2. Translate our data to their format (CORRECTED) ---
+    // --- 1. DATA MAPPING (No Changes Needed Here) ---
+    const productMap = { 'MTN': 'mtn', 'Telecel': 'telecel', 'AirtelTigo': 'at_bigtime' };
+    const product = productMap[transaction.type];
+    if (!product) throw new Error(`Invalid transaction type: "${transaction.type}"`);
     
-    // This logic to parse the GB from the details string is correct.
     const detailsString = transaction.details || '';
     const numberMatch = detailsString.match(/\d+(\.\d+)?/);
-    if (!numberMatch) {
-        throw new Error(`Could not parse a number from bundle details: "${detailsString}"`);
-    }
-    const bundleSizeInGB = parseFloat(numberMatch[0]);
-    const package_size = bundleSizeInGB * 1000; // Their system expects MB
+    if (!numberMatch) throw new Error(`Could not parse number from details: "${detailsString}"`);
+    const package_size = parseFloat(numberMatch[0]) * 1000;
 
-    // THIS IS THE CRITICAL FIX:
-    // This map translates our internal names to their required API names.
-    const productMap = {
-    'MTN': 'mtn',
-    'Telecel': 'telecel',
-    'AirtelTigo': 'at_bigtime' // NEW, CORRECTED value
-};
-
-    const product = productMap[transaction.type];
-    if (!product) {
-        throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);
-    }
-
-    // This is the data we will send as JSON.
-    const requestBody = {
+    // --- 2. CREATE THE REQUEST BODY (CRITICAL FIX) ---
+    // We use URLSearchParams to create an x-www-form-urlencoded string
+    const requestBody = new URLSearchParams({
         recipient: transaction.recipient,
         package_size: package_size,
-        product: product // Use the correctly mapped product name
-    };
+        product: product
+    });
 
-    // --- 3. Set up the request headers (CORRECTED) ---
+    // --- 3. SET UP THE HEADERS (CRITICAL FIX) ---
     const requestHeaders = {
-        'Content-Type': 'application/json', // CRITICAL: They expect JSON
+        'Content-Type': 'application/x-www-form-urlencoded', // Must be this
         'rk-api-token': EXTERNAL_RK_TOKEN
+        // Note: The 'x-api-key' is NOT in their latest example, so we will omit it for now.
     };
-
-    console.log('--- Sending the following CORRECTED data to RKStores ---');
+    
+    console.log('--- Sending final corrected FORM data to RKStores ---');
     console.log('URL:', EXTERNAL_API_URL);
     console.log('Headers:', requestHeaders);
-    console.log('Body (JSON):', requestBody);
+    console.log('Body (Form Data):', requestBody.toString());
     console.log('----------------------------------------------------');
 
-    // --- 4. Make the API call ---
+    // --- 4. MAKE THE API CALL ---
     try {
-        // Axios automatically sends the body as JSON when the header is set.
-        const response = await axios.post(EXTERNAL_API_URL, requestBody, { headers: requestHeaders });
+        // Axios needs to be told to send the body as a string when using this content type
+        const response = await axios.post(EXTERNAL_API_URL, requestBody.toString(), { headers: requestHeaders });
         
         console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
         return response.data;

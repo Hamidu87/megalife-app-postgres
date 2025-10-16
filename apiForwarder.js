@@ -235,6 +235,7 @@ module.exports = { forwardTransaction };
 
 const axios = require('axios');
 
+// This is the final, correct version of the function in apiForwarder.js
 async function forwardTransaction(transaction) {
     console.log(`Forwarding transaction ID: ${transaction.id} to external API...`);
     
@@ -245,43 +246,49 @@ async function forwardTransaction(transaction) {
         throw new Error("Missing external API configuration.");
     }
 
-    // --- 1. DATA MAPPING ---
-    const detailsString = transaction.details || '';
-    const numberMatch = detailsString.match(/\d+(\.\d+)?/);
-    if (!numberMatch) throw new Error(`Could not parse number from details: "${detailsString}"`);
-    const package_size = parseFloat(numberMatch[0]) * 1000;
-
-    // Based on their latest docs, 'product' is the correct parameter
+    // --- 1. DATA MAPPING (THIS IS THE CRITICAL FIX) ---
+    // This map now translates our internal names to their required API names.
     const productMap = {
         'MTN': 'mtn',
         'Telecel': 'telecel',
-        'AirtelTigo': 'at_bigtime'
+        'AirtelTigo': 'at_bigtime' // Correctly map 'AirtelTigo' to 'at_bigtime'
     };
-    const product = productMap[transaction.type];
-    if (!product) throw new Error(`Unmapped transaction type: "${transaction.type}"`);
 
-    // --- 2. CREATE THE REQUEST BODY (as x-www-form-urlencoded) ---
-    const requestBody = new URLSearchParams({
+    const product = productMap[transaction.type];
+    if (!product) {
+        throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);
+    }
+    
+    // This logic to parse the GB from the details string is correct.
+    const detailsString = transaction.details || '';
+    const numberMatch = detailsString.match(/\d+(\.\d+)?/);
+    if (!numberMatch) throw new Error(`Could not parse a number from details: "${detailsString}"`);
+    const package_size = parseFloat(numberMatch[0]) * 1000; // Their system expects MB
+
+    // --- 2. CREATE THE REQUEST BODY (as JSON) ---
+    // The previous error was 'Invalid Product', not 'Invalid Format'. So JSON is likely correct.
+    const requestBody = {
         recipient: transaction.recipient,
         package_size: package_size,
         product: product
-    }).toString();
+    };
 
     // --- 3. SET UP THE HEADERS ---
     const requestHeaders = {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'rk-api-token': EXTERNAL_RK_TOKEN
     };
     
-    console.log('--- Sending final corrected FORM data to RKStores ---');
+    console.log('--- Sending final corrected data to RKStores ---');
     console.log('URL:', EXTERNAL_API_URL);
     console.log('Headers:', requestHeaders);
-    console.log('Body (Form Data):', requestBody);
+    console.log('Body (JSON):', requestBody);
     console.log('----------------------------------------------------');
 
     // --- 4. MAKE THE API CALL ---
     try {
         const response = await axios.post(EXTERNAL_API_URL, requestBody, { headers: requestHeaders });
+        
         console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
         return response.data;
     } catch (error) {

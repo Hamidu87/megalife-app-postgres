@@ -148,7 +148,7 @@ module.exports = { forwardTransaction };
 
 
 
-
+/*
 
 
 
@@ -204,6 +204,94 @@ async function forwardTransaction(transaction) {
         console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
         return response.data;
 
+    } catch (error) {
+        console.error(`❌ Failed to forward transaction ${transaction.id}.`);
+        if (error.response) {
+            console.error('--- RKSTORES API ERROR RESPONSE ---');
+            console.error('Status:', error.response.status);
+            console.error('Data:', error.response.data);
+            console.error('---------------------------------');
+        } else {
+            console.error('Network or other error:', error.message);
+        }
+        throw error;
+    }
+}
+
+module.exports = { forwardTransaction };
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+const axios = require('axios');
+
+// This is the final, correct version of the function in apiForwarder.js
+async function forwardTransaction(transaction) {
+    console.log(`Forwarding transaction ID: ${transaction.id} to external API...`);
+    
+    const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL;
+    const EXTERNAL_API_KEY = process.env.EXTERNAL_API_KEY;
+    const EXTERNAL_RK_TOKEN = process.env.EXTERNAL_RK_TOKEN;
+
+    if (!EXTERNAL_API_URL || !EXTERNAL_API_KEY || !EXTERNAL_RK_TOKEN) {
+        throw new Error("Missing external API configuration in .env file.");
+    }
+
+    // --- 1. DATA MAPPING (Using network_id) ---
+    // This map translates our internal names to their required network_id numbers.
+    const networkMap = {
+        'MTN': 3,
+        'Telecel': 2,
+        'at_bigtime': 4 // Assuming 'at_bigtime' which is network_id 4
+    };
+    const network_id = networkMap[transaction.type];
+    if (!network_id) {
+        throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);
+    }
+    
+    // This logic to parse the GB from the details string is correct.
+    const detailsString = transaction.details || '';
+    const numberMatch = detailsString.match(/\d+(\.\d+)?/);
+    if (!numberMatch) throw new Error(`Could not parse a number from details: "${detailsString}"`);
+    const shared_bundle = parseFloat(numberMatch[0]) * 1000; // Their system expects MB
+
+    // --- 2. CREATE THE REQUEST BODY (as x-www-form-urlencoded) ---
+    const requestBody = new URLSearchParams({
+        recipient_msisdn: transaction.recipient,
+        network_id: network_id,
+        shared_bundle: shared_bundle,
+        order_reference: `megalife_${transaction.orderId}`
+    }).toString(); // Convert to a string like "key=value&key=value"
+
+    // --- 3. SET UP THE HEADERS ---
+    const requestHeaders = {
+        'x-api-key': EXTERNAL_API_KEY,
+        'rk-api-token': EXTERNAL_RK_TOKEN,
+        'Content-Type': 'application/x-www-form-urlencoded'
+    };
+    
+    console.log('--- Sending final corrected FORM data to RKStores ---');
+    console.log('URL:', EXTERNAL_API_URL);
+    console.log('Headers:', requestHeaders);
+    console.log('Body (Form Data):', requestBody);
+    console.log('----------------------------------------------------');
+
+    // --- 4. MAKE THE API CALL ---
+    try {
+        const response = await axios.post(EXTERNAL_API_URL, requestBody, { headers: requestHeaders });
+        
+        console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
+        return response.data;
     } catch (error) {
         console.error(`❌ Failed to forward transaction ${transaction.id}.`);
         if (error.response) {

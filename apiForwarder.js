@@ -235,49 +235,42 @@ module.exports = { forwardTransaction };
 
 const axios = require('axios');
 
-// This is the final, correct version of the function in apiForwarder.js
 async function forwardTransaction(transaction) {
     console.log(`Forwarding transaction ID: ${transaction.id} to external API...`);
     
     const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL;
-    const EXTERNAL_API_KEY = process.env.EXTERNAL_API_KEY;
     const EXTERNAL_RK_TOKEN = process.env.EXTERNAL_RK_TOKEN;
 
-    if (!EXTERNAL_API_URL || !EXTERNAL_API_KEY || !EXTERNAL_RK_TOKEN) {
-        throw new Error("Missing external API configuration in .env file.");
+    if (!EXTERNAL_API_URL || !EXTERNAL_RK_TOKEN) {
+        throw new Error("Missing external API configuration.");
     }
 
-    // --- 1. DATA MAPPING (Using network_id) ---
-    // This map translates our internal names to their required network_id numbers.
-    const productMap = {
-    'MTN': 'mtn',
-    'Telecel': 'telecel',
-    'AirtelTigo': 'at_bigtime' // Correctly map 'AirtelTigo' to 'at_bigtime'
-};
-    const network_id = networkMap[transaction.type];
-    if (!network_id) {
-        throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);
-    }
-    
-    // This logic to parse the GB from the details string is correct.
+    // --- 1. DATA MAPPING ---
     const detailsString = transaction.details || '';
     const numberMatch = detailsString.match(/\d+(\.\d+)?/);
-    if (!numberMatch) throw new Error(`Could not parse a number from details: "${detailsString}"`);
-    const shared_bundle = parseFloat(numberMatch[0]) * 1000; // Their system expects MB
+    if (!numberMatch) throw new Error(`Could not parse number from details: "${detailsString}"`);
+    const package_size = parseFloat(numberMatch[0]) * 1000;
+
+    // Based on their latest docs, 'product' is the correct parameter
+    const productMap = {
+        'MTN': 'mtn',
+        'Telecel': 'telecel',
+        'AirtelTigo': 'at_bigtime'
+    };
+    const product = productMap[transaction.type];
+    if (!product) throw new Error(`Unmapped transaction type: "${transaction.type}"`);
 
     // --- 2. CREATE THE REQUEST BODY (as x-www-form-urlencoded) ---
     const requestBody = new URLSearchParams({
-        recipient_msisdn: transaction.recipient,
-        network_id: network_id,
-        shared_bundle: shared_bundle,
-        order_reference: `megalife_${transaction.orderId}`
-    }).toString(); // Convert to a string like "key=value&key=value"
+        recipient: transaction.recipient,
+        package_size: package_size,
+        product: product
+    }).toString();
 
     // --- 3. SET UP THE HEADERS ---
     const requestHeaders = {
-        'x-api-key': EXTERNAL_API_KEY,
-        'rk-api-token': EXTERNAL_RK_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'rk-api-token': EXTERNAL_RK_TOKEN
     };
     
     console.log('--- Sending final corrected FORM data to RKStores ---');
@@ -289,7 +282,6 @@ async function forwardTransaction(transaction) {
     // --- 4. MAKE THE API CALL ---
     try {
         const response = await axios.post(EXTERNAL_API_URL, requestBody, { headers: requestHeaders });
-        
         console.log(`✅ Successfully forwarded transaction ${transaction.id}. Response:`, response.data);
         return response.data;
     } catch (error) {

@@ -249,11 +249,11 @@ async function forwardTransaction(transaction) {
 
     // --- 1. DATA MAPPING (Using network_id) ---
     // This map translates our internal names to their required network_id numbers.
-    const networkMap = {
-        'MTN': 3,
-        'Telecel': 2,
-        'at_bigtime': 4 // Assuming 'at_bigtime' which is network_id 4
-    };
+    const productMap = {
+    'MTN': 'mtn',
+    'Telecel': 'telecel',
+    'AirtelTigo': 'at_bigtime' // Correctly map 'AirtelTigo' to 'at_bigtime'
+};
     const network_id = networkMap[transaction.type];
     if (!network_id) {
         throw new Error(`Invalid or unmapped transaction type: "${transaction.type}"`);

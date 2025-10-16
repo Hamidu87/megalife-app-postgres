@@ -251,7 +251,7 @@ async function forwardTransaction(transaction) {
     const productMap = {
         'MTN': 'mtn',
         'Telecel': 'telecel',
-        'AirtelTigo': 'at_bigtime' // Correctly map 'AirtelTigo' to 'at_bigtime'
+        'AirtelTigo': 'at_ishare' // Correctly map 'AirtelTigo' to 'at_bigtime'
     };
 
     const product = productMap[transaction.type];

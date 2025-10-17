@@ -306,15 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const transDate = new Date(tx.transactionsDate).toLocaleString();
                     let statusBadgeClass = tx.status.toLowerCase() === 'failed' ? 'status-failed' : tx.status.toLowerCase() === 'pending' ? 'status-pending' : 'status-completed';
                     let actionButton = (tx.status === 'Processing' || tx.status === 'Failed') ? `<button class="forward-btn" data-id="${tx.id}">Forward Now</button>` : '';
-                    tableHTML += `<div class="table-row"><span>${tx.fullName || 'N/A'}</span><span>${tx.type}</span><span>${tx.details}</span><span>${tx.recipient || 'N/A'}</span><span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span><span>${transDate}</span><span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span><span class="actions">${actionButton}</span></div>`;
-                });
-            } else {
-                
-                let actionCell = `<span class="status-badge ${statusBadgeClass}">${tx.status}</span>`;
+                   
+                   let actionCell = `<span class="status-badge ${statusBadgeClass}">${tx.status}</span>`;
                     if (tx.status.toLowerCase() === 'failed') {
                         actionCell = `<button class="forward-now-btn" data-id="${tx.id}">Forward Now</button>`;
                     }
-                
+
+
+                    tableHTML += `<div class="table-row"><span>${tx.fullName || 'N/A'}</span><span>${tx.type}</span><span>${tx.details}</span><span>${tx.recipient || 'N/A'}</span><span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span><span>${transDate}</span><span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span><span class="actions">${actionButton}</span></div>`;
+                });
+            } else {
+                       
                 tableHTML += `<div class="empty-state">No transactions found.</div>`;
             }
             tableHTML += `</div>`;

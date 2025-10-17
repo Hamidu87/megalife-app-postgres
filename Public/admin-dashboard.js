@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
 
         try {
-            const response = await fetch('http://localhost:3000/admin/transactions', {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error(`Server error`);

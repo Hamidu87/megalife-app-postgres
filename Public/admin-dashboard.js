@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userTableContainer.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
         }
     }
-   /*
+   
     async function fetchAllTransactions() {
         const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
         if (!transTableContainer) return;
@@ -309,6 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableHTML += `<div class="table-row"><span>${tx.fullName || 'N/A'}</span><span>${tx.type}</span><span>${tx.details}</span><span>${tx.recipient || 'N/A'}</span><span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span><span>${transDate}</span><span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span><span class="actions">${actionButton}</span></div>`;
                 });
             } else {
+                
+                let actionCell = `<span class="status-badge ${statusBadgeClass}">${tx.status}</span>`;
+                    if (tx.status.toLowerCase() === 'failed') {
+                        actionCell = `<button class="forward-now-btn" data-id="${tx.id}">Forward Now</button>`;
+                    }
+                
                 tableHTML += `<div class="empty-state">No transactions found.</div>`;
             }
             tableHTML += `</div>`;
@@ -319,61 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-  */
-
-
-
-    // Function to fetch and display ALL TRANSACTIONS (UPDATED)
-    async function fetchAllTransactions() {
-        const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
-        if (!transTableContainer) return;
-        
-        transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
-
-        try {
-            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/transactions', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error(`Server error`);
-            
-            const transactions = await response.json();
-            
-            let tableHTML = `<div class="table-header">...</div><div class="table-body">`;
-
-            if (transactions.length > 0) {
-                transactions.forEach(tx => {
-                    // ... (Your existing logic to create date and status badge)
-                    
-                    // NEW: Add a "Forward Now" button if the status is 'Failed'
-                    let actionCell = `<span class="status-badge ${statusBadgeClass}">${tx.status}</span>`;
-                    if (tx.status.toLowerCase() === 'failed') {
-                        actionCell = `<button class="forward-now-btn" data-id="${tx.id}">Forward Now</button>`;
-                    }
-
-                    tableHTML += `
-                        <div class="table-row">
-                            <span>${tx.fullName || 'N/A'}</span>
-                            <span>${tx.type}</span>
-                            <span>${tx.details}</span>
-                            <span>${tx.recipient || 'N/A'}</span>
-                            <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
-                            <span>${transDate}</span>
-                            <!-- Use the new actionCell variable here -->
-                            <span>${actionCell}</span>
-                        </div>
-                    `;
-                });
-            } else { /* ... */ }
-
-            tableHTML += `</div>`;
-            transTableContainer.innerHTML = tableHTML;
-        } catch (error) { /* ... */ }
-    }
-
-
-
-
-
 
     async function fetchAllBundles() {
         const bundlesContainer = document.querySelector('#dataBundlesContent');

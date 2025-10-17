@@ -672,3 +672,16 @@ pre { background-color: var(--active-bg); padding: 15px; border-radius: 8px; fon
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
+
+.forward-now-btn {
+    background-color: var(--orange-btn);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.forward-now-btn:disabled {
+    background-color: #ccc;
+}

@@ -404,31 +404,36 @@ app.get('/admin/users', authenticateAdmin, async (req, res) => {
 });
 
 
-// MANUALLY FORWARD A TRANSACTION
+// NEW: MANUALLY FORWARD A TRANSACTION
 app.post('/admin/transactions/:id/forward', authenticateAdmin, async (req, res) => {
+    const { id } = req.params;
+    console.log(`Manual forwarding request received for Transaction ID: ${id}`);
+
     try {
-        const { id } = req.params;
-        const [transactions] = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
-        if (transactions.length === 0) {
+        // 1. Get the full transaction details from our database
+        const result = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Transaction not found.' });
         }
-
-        // Call our existing forwarder function
-        await forwardTransaction(transactions[0]);
         
-        // Update the status to show it's completed
-        await db.query("UPDATE transactions SET status = 'Completed' WHERE id = $1", [id]);
+        const transactionDetails = result.rows[0];
 
-        res.status(200).json({ message: 'Transaction has been manually forwarded successfully.' });
+        // 2. Call our existing, working forwardTransaction function
+        await forwardTransaction(transactionDetails);
+
+        // 3. If forwarding is successful, update the status in our database
+        await db.query("UPDATE transactions SET status = 'Completed' WHERE id = $1", [id]);
+        
+        console.log(`✅ Manual forward for Tx ID ${id} was successful.`);
+        res.status(200).json({ message: 'Transaction forwarded successfully and marked as Completed.' });
 
     } catch (error) {
-        console.error('Manual forward failed:', error);
-        // If it fails, mark it as Failed
-        await db.query("UPDATE transactions SET status = 'Failed' WHERE id = $1", [req.params.id]);
-        res.status(500).json({ message: 'Failed to forward transaction.' });
+        // If forwarding fails, keep the status as 'Failed'
+        console.error(`❌ Manual forward for Tx ID ${id} failed.`);
+        // The error details are already logged inside forwardTransaction, so we just send a generic server error.
+        res.status(500).json({ message: 'Failed to forward transaction. Check server logs for details.' });
     }
 });
-
 
      // GET ALL TRANSACTIONS
 // GET ALL TRANSACTIONS (Final PostgreSQL Version)

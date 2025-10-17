@@ -158,25 +158,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Transaction Clicks
-        const forwardBtn = e.target.closest('.forward-btn');
+       // NEW: Handle "Forward Now" button click
+        const forwardBtn = e.target.closest('.forward-now-btn');
         if (forwardBtn) {
+            e.preventDefault();
+            const id = forwardBtn.dataset.id;
+            console.log(`Forward Now clicked for Tx ID: ${id}`);
+            
+            // Give user feedback
             forwardBtn.textContent = 'Forwarding...';
             forwardBtn.disabled = true;
-            const id = forwardBtn.dataset.id;
+
             try {
                 const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/transactions/${id}/forward`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!response.ok) throw new Error('Forwarding failed on server.');
+
+                if (!response.ok) {
+                    throw new Error('Server responded with an error.');
+                }
+                
+                // If successful, refresh the entire transactions list to show the new 'Completed' status
+                alert('Transaction forwarded successfully!');
                 fetchAllTransactions();
+
             } catch (error) {
-                alert('Failed to forward transaction.');
-                fetchAllTransactions();
+                console.error('Manual forward failed:', error);
+                alert('Failed to forward transaction. Please check the server logs.');
+                // Re-enable the button on failure
+                forwardBtn.textContent = 'Forward Now';
+                forwardBtn.disabled = false;
             }
         }
     });
-
 
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     
@@ -276,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userTableContainer.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
         }
     }
-
+   /*
     async function fetchAllTransactions() {
         const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
         if (!transTableContainer) return;
@@ -304,6 +319,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+  */
+
+
+
+    // Function to fetch and display ALL TRANSACTIONS (UPDATED)
+    async function fetchAllTransactions() {
+        const transTableContainer = document.querySelector('#allTransactionsContent .transactions-table');
+        if (!transTableContainer) return;
+        
+        transTableContainer.innerHTML = '<div class="empty-state">Loading transactions...</div>';
+
+        try {
+            const response = await fetch('http://localhost:3000/admin/transactions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error(`Server error`);
+            
+            const transactions = await response.json();
+            
+            let tableHTML = `<div class="table-header">...</div><div class="table-body">`;
+
+            if (transactions.length > 0) {
+                transactions.forEach(tx => {
+                    // ... (Your existing logic to create date and status badge)
+                    
+                    // NEW: Add a "Forward Now" button if the status is 'Failed'
+                    let actionCell = `<span class="status-badge ${statusBadgeClass}">${tx.status}</span>`;
+                    if (tx.status.toLowerCase() === 'failed') {
+                        actionCell = `<button class="forward-now-btn" data-id="${tx.id}">Forward Now</button>`;
+                    }
+
+                    tableHTML += `
+                        <div class="table-row">
+                            <span>${tx.fullName || 'N/A'}</span>
+                            <span>${tx.type}</span>
+                            <span>${tx.details}</span>
+                            <span>${tx.recipient || 'N/A'}</span>
+                            <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
+                            <span>${transDate}</span>
+                            <!-- Use the new actionCell variable here -->
+                            <span>${actionCell}</span>
+                        </div>
+                    `;
+                });
+            } else { /* ... */ }
+
+            tableHTML += `</div>`;
+            transTableContainer.innerHTML = tableHTML;
+        } catch (error) { /* ... */ }
+    }
+
+
+
+
+
+
     async function fetchAllBundles() {
         const bundlesContainer = document.querySelector('#dataBundlesContent');
         if (!bundlesContainer) return;

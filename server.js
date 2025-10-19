@@ -661,6 +661,11 @@ app.get('/user/transactions/bundles', authenticateToken, async (req, res) => {
 });
 
 
+
+
+
+
+
 // GET BUNDLE ORDERS FOR CURRENT USER
 
 app.get('/user/transactions/bundles', authenticateToken, async (req, res) => {
@@ -720,6 +725,71 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
 });
 
 
+
+
+
+
+
+
+
+
+/*
+// Data Bundle Purchase
+// Data Bundle Purchase (Final Corrected Version)
+app.post('/purchase-bundle', authenticateToken, async (req, res) => {
+    const connection = await db.getConnection(); 
+    try {
+        await connection.beginTransaction();
+
+        const { type, details, amount, recipient } = req.body; 
+        const userId = req.user.userId;
+
+        if (!type || !details || !amount || !recipient || amount <= 0) {
+            return res.status(400).json({ message: 'Missing all required purchase information.' });
+        }
+        
+        const [users] = await connection.query('SELECT walletBalance FROM users WHERE id = $1 FOR UPDATE', [userId]);
+        
+        if (users.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        const user = users[0];
+        const currentBalance = parseFloat(user.walletBalance);
+
+        if (currentBalance < amount) {
+            await connection.rollback();
+            return res.status(402).json({ message: 'Insufficient wallet balance.' });
+        }
+        
+        const newBalance = currentBalance - amount;
+        await connection.query('UPDATE users SET walletBalance = ? WHERE id = ?', [newBalance, userId]);
+
+        const randomOrderId = Math.floor(1000 + Math.random() * 9000);
+        
+        // This query is now correct and expects the clean "details"
+        const [insertResult] = await connection.query(
+            'INSERT INTO transactions (userId, orderId, type, details, amount, status, recipient) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [userId, randomOrderId, type, details, amount, 'Processing', recipient]
+        );
+        
+        const newTransactionId = insertResult.insertId;
+        addTransactionToQueue(newTransactionId);
+        
+        await connection.commit();
+        res.status(200).json({ message: 'Purchase successful! Your order is being processed.', newBalance });
+
+    } catch (error) {
+        await connection.rollback(); 
+        console.error('Error during bundle purchase:', error);
+        res.status(500).json({ message: 'An error occurred during the purchase.' });
+    } finally {
+        connection.release();
+    }
+});
+
+
+*/
 
 
 

@@ -1,36 +1,50 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Top-Up History - Megalife</title>
-    <link rel="icon" type="image/x-icon" href="../favicon.png.png?v=1.1">
-    <link rel="stylesheet" href="UserInterfaces.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEGALIFEs - Top Up History</title>
+    <!-- Ensure this CSS file is correctly linked -->
+    <link rel="stylesheet" href="UserInterfaces.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
-        <aside class="sidebar"></aside>
-        <main class="main-content centered-page"></main>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <!-- The sidebar will be loaded and managed by main.js -->
+        <aside class="sidebar">
+            <!-- This placeholder is intentionally empty -->      
+        </aside>
+
+
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+         <!-- Header will be loaded by main.js -->
             <header class="main-header"></header>
+
+            <div class="header-bar">
+                <h2 class="page-title">Wallet Top-up Transactions</h2>
+                <div class="search-wrapper">
+                    <input type="text" placeholder="Search by reference...">
+                </div>
+            </div>
             
-            <h2 class="page-title">My Wallet Top-Up History</h2>
-            
-           
-            <div class="history-table" id="topup-history-table">
+            <!-- 1. ADDED ID AND REMOVED HARDCODED ROWS -->
+            <div class="topup-table" id="topup-history-table">
+                <!-- The history.js script will fill this area with data -->
                 <div class="empty-state">Loading your top-up history...</div>
             </div>
         </main>
     </div>
-    
-    
+
+    <!-- 2. CORRECTED SCRIPT TAGS AT THE BOTTOM -->
+    <!-- main.js handles the layout (sidebar/header) -->
     <script src="../main.js"></script>
-    
+    <!-- history.js handles the data for this specific page -->
     <script src="history.js"></script>
     <script src="layout.js"></script>
     <script src="../profile.js"></script> 
 </body>
 </html>
-
- 

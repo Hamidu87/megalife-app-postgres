@@ -2,19 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.png.png?v=1.1">
-
-    <!-- This is a "meta refresh" tag. It tells the browser to immediately
-         redirect to the login page. This is the fastest and most reliable way. -->
-    <meta http-equiv="refresh" content="0; url=login.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Megalife Consult - Instant Data Bundles</title>
+    <!-- We will create this new CSS file -->
+    <link rel="stylesheet" href="Megalife.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <p>If you are not redirected automatically, please <a href="login.html">click here</a>.</p>
 
-    <script>
-        // A JavaScript fallback for extra reliability.
-        window.location.href = 'login.html';
-    </script>
+    <!-- 1. Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">M</div>
+        
+            <div class="nav-links">
+                <a href="login.html" class="btn btn-secondary">Login</a>
+                <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <h1>Instant, Affordable Data Bundles for All Networks</h1>
+            <p class="subtitle">Top up your data in seconds. Simple, fast, and reliable service for MTN, Telecel, and AirtelTigo.</p>
+            <a href="signup.html" class="btn btn-primary btn-lg">Get Started Now</a>
+        </div>
+    </header>
+
+    <!-- 3. Services Section -->
+<section class="services">
+    <div class="container">
+        <h2>Our Core Services</h2>
+        <div class="services-grid">
+            <!-- ADDED 'mtn' CLASS -->
+            <div class="service-card mtn">
+                <img src="UserInterfaces/Assets/images/MTN-new-logo1.webp" alt="MTN">
+                <h3>MTN Data Bundles</h3>
+                <p>Get the best rates on MTN data, delivered instantly to any number.</p>
+            </div>
+            <!-- ADDED 'telecel' CLASS -->
+            <div class="service-card telecel">
+                <img src="UserInterfaces/Assets/images/telecel_logo.png" alt="Telecel">
+                <h3>Telecel Bundles</h3>
+                <p>Fast and reliable Telecel data top-ups at competitive prices.</p>
+            </div>
+            <!-- ADDED 'airteltigo' CLASS -->
+            <div class="service-card airteltigo">
+                <img src="UserInterfaces/Assets/images/AT_logo.png" alt="AirtelTigo">
+                <h3>AirtelTigo Bundles</h3>
+                <p>Affordable iShare and BigTime bundles for all your AirtelTigo needs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- 4. How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Simple Steps to Get Your Data</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <span>1</span>
+                    <h3>Create an Account</h3>
+                    <p>Sign up in seconds with just your name and email.</p>
+                </div>
+                <div class="step">
+                    <span>2</span>
+                    <h3>Top Up Your Wallet</h3>
+                    <p>Securely add funds to your wallet using Paystack.</p>
+                </div>
+                <div class="step">
+                    <span>3</span>
+                    <h3>Purchase Your Bundle</h3>
+                    <p>Select your network, choose a bundle, and receive it instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Megalife Consult. All Rights Reserved.</p>
+        </div>
+    </footer>
+
 </body>
 </html>

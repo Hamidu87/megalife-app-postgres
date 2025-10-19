@@ -141,7 +141,7 @@ app.post('/register', async (req, res) => {
         // 2. THE CORRECT HTML to make the link a styled button
         const msg = {
             to: email,
-            from: 'abdulhamidu51@gmail.com', // Your verified sender
+            from: 'support@megalifeconsult.com', // Your verified sender
             subject: 'Verify Your Email Address for Megalife Consult',
             html: `
                 <div style="font-family: sans-serif; text-align: center; padding: 20px; line-height: 1.6;">
@@ -302,7 +302,7 @@ app.post('/forgot-password', async (req, res) => {
         const resetUrl = `https://www.megalifeconsult.com/reset-password.html?token=${resetToken}`;
         const msg = {
     to: user.email,
-    from: 'abdulhamidu51@gmail.com', // Your verified sender
+    from: 'support@megalifeconsult.com', // Your verified sender
     subject: 'Your Password Reset Request',
     html: `
         <div style="font-family: sans-serif; text-align: center; padding: 20px;">

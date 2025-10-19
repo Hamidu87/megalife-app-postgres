@@ -39,10 +39,28 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // --- 5. DATABASE CONFIGURATION ---
+
+
+// --- 5. DATABASE CONFIGURATION (FOR NEON POSTGRESQL - FINAL VERSION) ---
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    },
+    keepAlive: true,
+    idleTimeoutMillis: 240000, // 4 minutes
+    connectionTimeoutMillis: 20000, // 20 seconds
+});
+
+
+
+/*
 const db = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
+*/
+
 // --- 6. AUTHENTICATION MIDDLEWARE (DEFINED BEFORE USE) ---
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -150,7 +168,6 @@ res.status(201).json({ message: 'Registration successful! Please check your emai
 });
 
 // NEW: Email Verification Route
-// Email Verification Route (for MySQL)
 // Email Verification Route (Final PostgreSQL Version)
 app.post('/verify-email', async (req, res) => {
     try {

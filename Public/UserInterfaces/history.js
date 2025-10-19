@@ -76,6 +76,8 @@ async function fetchBundleOrders() {
     }
 }
 
+
+
     // Function to fetch and build the ALL ORDERS list
     async function fetchAllOrders() {
         const listContainer = document.getElementById('all-orders-list');
@@ -113,12 +115,8 @@ async function fetchBundleOrders() {
     `;
 });
 
-
-
-               
-        
-
-
+              
+    
                 
             } else {
                 listContainer.innerHTML = `<div class="empty-state">You have no orders yet.</div>`;
@@ -128,6 +126,9 @@ async function fetchBundleOrders() {
             listContainer.innerHTML = `<div class="empty-state">Error loading orders.</div>`;
         }
     }
+
+
+
 
     // Function to fetch and build the TOP UP HISTORY table
     async function fetchTopUpHistory() {
@@ -262,15 +263,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Function to fetch and build the ALL ORDERS list (UNCHANGED)
+      // Function to fetch and build the ALL ORDERS list
     async function fetchAllOrders() {
-        // ... (Your existing, working fetchAllOrders function)
+        const listContainer = document.getElementById('all-orders-list');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = '<div class="empty-state">Loading all orders...</div>';
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/transactions/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const transactions = await response.json();
+            
+            if (transactions.length > 0) {
+                listContainer.innerHTML = '';
+      transactions.forEach(tx => {
+    let description = `${tx.type} - ${tx.details}`;
+    if (tx.recipient) {
+        description += ` - ${tx.recipient}`;
     }
 
-    // Function to fetch and build the TOP UP HISTORY table (UNCHANGED)
-    async function fetchTopUpHistory() {
-        // ... (Your existing, working fetchTopUpHistory function)
+    listContainer.innerHTML += `
+        <div class="order-card">
+            <div class="card-row">
+                <span class="order-id">#${tx.orderId || tx.id}</span>
+                <span class="date">${new Date(tx.transactionsDate).toLocaleString()}</span>
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <p class="order-description">${description}</p>
+            <div class="card-row">
+                <span class="status-badge status-completed">✓ ${tx.status}</span>
+                <span class="order-price">₵${parseFloat(tx.amount).toFixed(2)}</span>
+            </div>
+        </div>
+    `;
+});
+
+              
+    
+                
+            } else {
+                listContainer.innerHTML = `<div class="empty-state">You have no orders yet.</div>`;
+            }
+        } catch (error) {
+            console.error("Failed to fetch all orders:", error);
+            listContainer.innerHTML = `<div class="empty-state">Error loading orders.</div>`;
+        }
     }
+
+
+
+    // Function to fetch and build the TOP UP HISTORY table
+    async function fetchTopUpHistory() {
+        const tableContainer = document.getElementById('topup-history-table');
+        if (!tableContainer) return;
+
+        tableContainer.innerHTML = '<div class="empty-state">Loading top-up history...</div>';
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/user/transactions/topups', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const transactions = await response.json();
+            
+            let tableHTML = `
+                <div class="table-header">
+                    <span>Amount</span><span>Status</span><span>Details</span><span>Date & Time</span>
+                </div>`;
+            if (transactions.length > 0) {
+                transactions.forEach(tx => {
+                    tableHTML += `
+                        <div class="table-row">
+                            <span class="amount-credited">GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
+                            <span><span class="status-badge status-credited">✓ ${tx.status}</span></span>
+                            <span>${tx.details}</span>
+
+                            <!-- CORRECTED: uses transactionsDate -->
+                            <span>${new Date(tx.transactionsDate).toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                tableHTML += `<div class="empty-state">No top-up history found.</div>`;
+            }
+            tableContainer.innerHTML = tableHTML;
+        } catch (error) {
+            console.error("Failed to fetch top-up history:", error);
+            tableContainer.innerHTML = `<div class="empty-state">Error loading history.</div>`;
+        }
+    }
+
 
     // --- 4. PAGINATION HELPER FUNCTIONS (NEW) ---
     function updatePaginationControls() {

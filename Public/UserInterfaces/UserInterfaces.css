@@ -1227,7 +1227,7 @@ body {
     background-color: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(124, 118, 118, 0.08);
     border: 1px solid var(--border-color);
     width: 100%;
     max-width: 400px;

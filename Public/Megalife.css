@@ -675,7 +675,7 @@ pre { background-color: var(--active-bg); padding: 15px; border-radius: 8px; fon
 
 .forward-now-btn {
     background-color: var(--orange-btn);
-    color: white;
+    color: rgb(244, 79, 79);
     border: none;
     padding: 6px 12px;
     border-radius: 6px;

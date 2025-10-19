@@ -598,9 +598,59 @@ app.get('/user/dashboard-summary', authenticateToken, async (req, res) => {
     } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
 
+
+
+
+
+
+
+
+// GET BUNDLE ORDERS FOR CURRENT USER (with Pagination)
+app.get('/user/transactions/bundles', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        
+        // 1. Get the page number from the request's query string (e.g., ?page=2)
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Show 10 items per page
+        const offset = (page - 1) * limit;
+
+        // 2. First, get the TOTAL count of bundle transactions for this user
+        const countQuery = `SELECT COUNT(*) FROM transactions WHERE "userId" = $1 AND type != 'Top-Up'`;
+        const countResult = await db.query(countQuery, [userId]);
+        const totalTransactions = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalTransactions / limit);
+
+        // 3. Now, fetch only the 'slice' of transactions for the requested page
+        const dataQuery = `
+            SELECT * FROM transactions 
+            WHERE "userId" = $1 AND type != 'Top-Up' 
+            ORDER BY "transactionsDate" DESC
+            LIMIT $2 OFFSET $3
+        `;
+        const dataResult = await db.query(dataQuery, [userId, limit, offset]);
+        const transactions = dataResult.rows;
+
+        // 4. Send back a complete data object with pagination info
+        res.status(200).json({
+            transactions: transactions,
+            currentPage: page,
+            totalPages: totalPages
+        });
+    } catch (error) {
+        console.error('Error fetching paginated bundle orders:', error);
+        res.status(500).json({ message: 'Server error while fetching bundle orders.' });
+    }
+});
+
+
+
+
+
+
+
 // GET BUNDLE ORDERS FOR CURRENT USER
-
-
+/*
 app.get('/user/transactions/bundles', authenticateToken, async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM transactions WHERE "userId" = $1 AND type != $2 ORDER BY "transactionsDate" DESC', [req.user.userId, 'Top-Up']);
@@ -656,6 +706,16 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         client.release();
     }
 });
+
+
+
+
+*/
+
+
+
+
+
 
 // Data Bundle Purchase
 // Data Bundle Purchase (Final Corrected Version)

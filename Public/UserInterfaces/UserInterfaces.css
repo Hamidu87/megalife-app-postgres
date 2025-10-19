@@ -1615,73 +1615,81 @@ body {
     NEW USER BUNDLE HISTORY TABLE STYLES
 ============================================
 */
+/* --- Add these new styles to the bottom of UserInterfaces.css --- */
 
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: rgba(166, 111, 190, 0.775);
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border: 1px solid #e9edf4;
-    font-size: 14px; /* Base font size for the table */
+/* 
+============================================
+    STYLES FOR SINGLE-COLUMN PAGES (e.g., Top-Up History)
+============================================
+*/
+
+.page-container {
+    max-width: 900px; /* Set a max width for the content */
+    margin: 0 auto; /* Center the container */
+    padding: 30px;
 }
 
-.history-table .table-header,
-.history-table .table-row {
+.page-header-logos {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.page-header-logos img {
+    height: 50px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.content-card {
+    background-color: #FFFFFF;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.content-card .page-title {
+    margin-top: 0;
+    text-align: left;
+}
+
+/* Specific styles for the top-up history table inside the card */
+.topup-history-table-container .table-header,
+.topup-history-table-container .table-row {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr 1.2fr 0.8fr 1fr 0.8fr 1.2fr 2fr;
+    grid-template-columns: 1fr 1fr 1.5fr 1.5fr; /* 4 columns */
     align-items: center;
     gap: 15px;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e9edf4;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.history-table .table-header {
+.topup-history-table-container .table-header {
     font-weight: 600;
-    color: #333;
-    font-size: 14px;
+    color: var(--text-dark);
 }
 
-.history-table .table-row {
-    color: #555;
-}
-
-.history-table .table-row:last-child {
+.topup-history-table-container .table-row:last-child {
     border-bottom: none;
 }
 
-/* Specific column styling */
-.history-table .order-id-link {
-    color: #d32f2f;
-    font-weight: 500;
-    text-decoration: none;
+.topup-history-table-container .amount-credited {
+    color: var(--primary-blue);
+    font-weight: 600;
 }
-.history-table .volume a {
-    color: #2A68C2;
-    font-weight: 500;
-    text-decoration: none;
-}
-.history-table .date-time {
-    color: #2A68C2;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-/* Status badge styling */
-.history-table .status-badge {
-    padding: 6px 12px;
-    border-radius: 16px;
+.topup-history-table-container .status-badge {
+    padding: 5px 10px;
+    border-radius: 12px;
     font-size: 12px;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
 }
+.topup-history-table-container .status-credited {
+    background-color: #E6F7F0; /* Light green */
+    color: #00875A; /* Dark green */
+}
+ 
 
-.history-table .status-badge.status-delivered {
-    background-color: #E6F7F0; /* Light Green */
-    color: #00875A; /* Dark Green */
-}
+
 
 
 /* --- ADD THIS AT THE VERY BOTTOM FOR RESPONSIVENESS --- */

@@ -686,6 +686,11 @@ app.get('/user/transactions/all', authenticateToken, async (req, res) => {
         res.status(200).json(result.rows);
     } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
+
+
+
+
+/*
 app.post('/initialize-payment', authenticateToken, async (req, res) => {
     try {
         const { amount } = req.body;
@@ -699,6 +704,70 @@ app.post('/initialize-payment', authenticateToken, async (req, res) => {
         res.status(200).json(response.data);
     } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
+
+*/
+
+
+
+// Initialize Wallet Top-Up (Paystack - with Fee Calculation)
+app.post('/initialize-payment', authenticateToken, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const userId = req.user.userId;
+        
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ message: 'A valid amount is required.' });
+        }
+        
+        const result = await db.query('SELECT email FROM users WHERE id = $1', [userId]);
+        const userEmail = result.rows[0].email;
+
+        // --- THIS IS THE CRITICAL AND FINAL FIX ---
+
+        // 1. Define the fee percentage.
+        const feePercentage = 1.95 / 100; // 1.95%
+
+        // 2. Calculate the fee Paystack will charge on the amount.
+        let paystackFee = amount * feePercentage;
+
+        // 3. Paystack has a fee cap for lower amounts. If the fee is over a certain amount, 
+        //    we might need to add a flat fee. Let's keep it simple for now and just use the percentage.
+        //    A more advanced version would handle fee caps.
+
+        // 4. Calculate the total amount the customer needs to pay.
+        const totalAmount = parseFloat(amount) + paystackFee;
+        
+        // 5. Convert the TOTAL amount to kobo for Paystack.
+        const amountInKobo = Math.round(totalAmount * 100);
+
+        const paymentData = {
+            email: userEmail,
+            amount: amountInKobo, // Send the TOTAL amount to Paystack
+            callback_url: `https://www.megalifeconsult.com/UserInterfaces/userdashboard.html?payment_status=success`,
+            metadata: { 
+                user_id: userId, 
+                action: 'wallet_top_up',
+                original_amount: amount // We save the original amount in metadata
+            }
+        };
+
+        const response = await paystack.transaction.initialize(paymentData);
+        
+        res.status(200).json(response.data);
+
+    } catch (error) {
+        console.error('Error initializing payment:', error);
+        res.status(500).json({ message: 'An error occurred on the server.' });
+    }
+});
+
+
+
+
+
+
+
+
 app.post('/purchase-bundle', authenticateToken, async (req, res) => {
     const client = await db.connect();
     try {
@@ -724,72 +793,6 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
     }
 });
 
-
-
-
-
-
-
-
-
-
-/*
-// Data Bundle Purchase
-// Data Bundle Purchase (Final Corrected Version)
-app.post('/purchase-bundle', authenticateToken, async (req, res) => {
-    const connection = await db.getConnection(); 
-    try {
-        await connection.beginTransaction();
-
-        const { type, details, amount, recipient } = req.body; 
-        const userId = req.user.userId;
-
-        if (!type || !details || !amount || !recipient || amount <= 0) {
-            return res.status(400).json({ message: 'Missing all required purchase information.' });
-        }
-        
-        const [users] = await connection.query('SELECT walletBalance FROM users WHERE id = $1 FOR UPDATE', [userId]);
-        
-        if (users.length === 0) {
-            await connection.rollback();
-            return res.status(404).json({ message: 'User not found.' });
-        }
-        const user = users[0];
-        const currentBalance = parseFloat(user.walletBalance);
-
-        if (currentBalance < amount) {
-            await connection.rollback();
-            return res.status(402).json({ message: 'Insufficient wallet balance.' });
-        }
-        
-        const newBalance = currentBalance - amount;
-        await connection.query('UPDATE users SET walletBalance = ? WHERE id = ?', [newBalance, userId]);
-
-        const randomOrderId = Math.floor(1000 + Math.random() * 9000);
-        
-        // This query is now correct and expects the clean "details"
-        const [insertResult] = await connection.query(
-            'INSERT INTO transactions (userId, orderId, type, details, amount, status, recipient) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [userId, randomOrderId, type, details, amount, 'Processing', recipient]
-        );
-        
-        const newTransactionId = insertResult.insertId;
-        addTransactionToQueue(newTransactionId);
-        
-        await connection.commit();
-        res.status(200).json({ message: 'Purchase successful! Your order is being processed.', newBalance });
-
-    } catch (error) {
-        await connection.rollback(); 
-        console.error('Error during bundle purchase:', error);
-        res.status(500).json({ message: 'An error occurred during the purchase.' });
-    } finally {
-        connection.release();
-    }
-});
-
-
-*/
 
 
 
@@ -827,6 +830,8 @@ setInterval(async () => {
 // --- WEBHOOK ROUTE ---
 // Paystack Webhook (Final PostgreSQL Version)
 // Paystack Webhook (Final Corrected Version)
+
+/*
 app.post('/paystack-webhook', async (req, res) => {
     // ... (Your existing signature verification logic is here)
     const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -872,6 +877,47 @@ app.post('/paystack-webhook', async (req, res) => {
     
     res.sendStatus(200);
 });
+
+
+
+*/
+
+
+
+
+
+
+// Paystack Webhook (CORRECTED)
+app.post('/paystack-webhook', async (req, res) => {
+    const secret = process.env.PAYSTACK_SECRET_KEY;
+    const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
+    if (hash !== req.headers['x-paystack-signature']) return res.sendStatus(400);
+    
+    const event = req.body;
+    if (event.event === 'charge.success') {
+        const { metadata } = event.data;
+        
+        if (metadata && metadata.action === 'wallet_top_up') {
+            try {
+                // THIS IS THE FIX: Use the original amount we saved in metadata
+                const topUpAmount = metadata.original_amount;
+                const userId = metadata.user_id;
+                
+                await db.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
+                console.log(`Wallet updated for user ${userId}. Added: GH₵${topUpAmount}.`);
+            } catch (error) {
+                console.error('Webhook wallet update error:', error);
+            }
+        }
+    }
+    res.sendStatus(200);
+});
+
+
+
+
+
+
 
 
 // UPLOAD USER PROFILE PICTURE

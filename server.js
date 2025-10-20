@@ -904,6 +904,8 @@ app.post('/paystack-webhook', async (req, res) => {
                 const userId = metadata.user_id;
                 
                 await db.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
+                // 1. Update the user's wallet balance
+                await client.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
                 
                 // 2. THIS IS THE NEW CODE: Create a record in the transactions table
                 await client.query(

@@ -904,6 +904,16 @@ app.post('/paystack-webhook', async (req, res) => {
                 const userId = metadata.user_id;
                 
                 await db.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
+                
+                // 2. THIS IS THE NEW CODE: Create a record in the transactions table
+                await client.query(
+                    'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    [userId, reference, 'Top-Up', 'Wallet Top-Up', topUpAmount, 'Completed', null]
+                );
+                
+                // If both queries succeed, commit the transaction
+                await client.query('COMMIT');
+                
                 console.log(`Wallet updated for user ${userId}. Added: GH₵${topUpAmount}.`);
             } catch (error) {
                 console.error('Webhook wallet update error:', error);

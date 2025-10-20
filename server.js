@@ -903,7 +903,7 @@ app.post('/paystack-webhook', async (req, res) => {
                 const topUpAmount = metadata.original_amount;
                 const userId = metadata.user_id;
                 
-                await db.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
+                
                 // 1. Update the user's wallet balance
                 await client.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
                 
@@ -913,18 +913,24 @@ app.post('/paystack-webhook', async (req, res) => {
                     [userId, reference, 'Top-Up', 'Wallet Top-Up', topUpAmount, 'Completed', null]
                 );
                 
+                
                 // If both queries succeed, commit the transaction
                 await client.query('COMMIT');
                 
-                console.log(`Wallet updated for user ${userId}. Added: GH₵${topUpAmount}.`);
+                console.log(`Wallet updated AND transaction recorded for user ${userId}. Ref: ${reference}`);
             } catch (error) {
-                console.error('Webhook wallet update error:', error);
+                // If anything fails, roll back the transaction
+                await client.query('ROLLBACK');
+                console.error('Webhook processing error:', error);
+            } finally {
+                // ALWAYS release the client
+                client.release();
             }
         }
     }
+    
     res.sendStatus(200);
 });
-
 
 
 

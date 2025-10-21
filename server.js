@@ -888,6 +888,7 @@ app.post('/paystack-webhook', async (req, res) => {
 
 
 // Paystack Webhook (Corrected to Record Transaction)
+// Paystack Webhook (CORRECTED to use original_amount from metadata)
 app.post('/paystack-webhook', async (req, res) => {
     // This part verifies the request is from Paystack
     const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -898,50 +899,48 @@ app.post('/paystack-webhook', async (req, res) => {
     
     const event = req.body;
 
-    // We only care about successful payments
     if (event.event === 'charge.success') {
-        const { amount, reference, metadata } = event.data;
+        // We get the data object from the event
+        const { reference, metadata } = event.data;
         
-        // Check if this was a wallet top-up
+        // We only proceed if this is a wallet top-up
         if (metadata && metadata.action === 'wallet_top_up') {
-            const client = await db.connect(); // Get a client from the pool for a transaction
+            const client = await db.connect();
             try {
-                // Start a database transaction
                 await client.query('BEGIN');
 
-                const topUpAmount = amount / 100;
+                // THIS IS THE CRITICAL FIX:
+                // We use the 'original_amount' we saved in the metadata.
+                // This is the amount the user INTENDED to top up (e.g., 10.00).
+                const topUpAmount = metadata.original_amount; 
                 const userId = metadata.user_id;
 
-                // 1. Update the user's wallet balance
+                if (!topUpAmount || !userId) {
+                    throw new Error('Webhook metadata is missing original_amount or user_id.');
+                }
+
+                // 1. Update the user's wallet balance with the CORRECT amount
                 await client.query('UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2', [topUpAmount, userId]);
 
-                // 2. THIS IS THE NEW, CRITICAL STEP:
-                //    Create a record in the transactions table
+                // 2. Create a record in the transactions table with the CORRECT amount
                 await client.query(
-                    'INSERT INTO transactions ("userId", type, details, amount, status, recipient) VALUES ($1, $2, $3, $4, $5, $6)',
-                    [userId, 'Top-Up', 'Wallet Top-Up', topUpAmount, 'Completed', null] // Recipient is null for top-ups
+                    'INSERT INTO transactions ("userId", type, details, amount, status) VALUES ($1, $2, $3, $4, $5)',
+                    [userId, 'Top-Up', 'Wallet Top-Up', topUpAmount, 'Completed']
                 );
 
-                // If both queries succeed, commit the transaction
                 await client.query('COMMIT');
                 
-                console.log(`✅ Wallet updated AND transaction recorded for user ${userId}. Ref: ${reference}`);
-
+                console.log(`✅ Wallet updated AND transaction recorded for user ${userId}. Amount: GH₵${topUpAmount}. Ref: ${reference}`);
             } catch (error) {
-                // If anything fails, roll back both changes
                 await client.query('ROLLBACK');
-                console.error('Webhook wallet update and transaction recording error:', error);
+                console.error('Webhook processing error:', error);
             } finally {
-                // ALWAYS release the client back to the pool
                 client.release();
             }
         }
     }
-    
-    // Always send a 200 OK to Paystack to let them know we received the event
     res.sendStatus(200);
 });
-
 
 
 

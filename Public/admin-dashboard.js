@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // CORRECTED: The navigation is now in the sidebar menu
     const menuItems = document.querySelectorAll('.sidebar-menu .menu-item a');
     const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
-    
+
     // Elements for Bundle Modal
     const modal = document.getElementById('bundle-modal');
     const bundleForm = document.getElementById('bundle-form');
@@ -478,7 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 6. INITIALIZE THE DASHBOARD ---
+    
     fetchAllAnalytics();
+    fetchAllUsers();
 });
 
 

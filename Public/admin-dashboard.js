@@ -272,31 +272,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 5. DATA FETCHING FUNCTIONS ---
     
-    async function fetchAllUsers() {
-        const userTableContainer = document.querySelector('#userManagementContent .user-table');
-        const userCountBadge = document.querySelector('.tab-item[data-target="userManagementContent"] .badge');
-        if (!userTableContainer || !userCountBadge) return;
-        userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
-        try {
-            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' } });
-            if (!response.ok) throw new Error('Failed to fetch users');
-            const users = await response.json();
+    // Replace the existing fetchAllUsers function in your admin-dashboard.js
+async function fetchAllUsers() {
+    const userTableContainer = document.querySelector('#userManagementContent .user-table');
+    const userCountBadge = document.querySelector('.sidebar-menu a[data-target="userManagementContent"] .badge'); // We need to add this badge to the HTML
+    
+    // Fallback for the old header tab badge
+    const headerBadge = document.querySelector('.content-tabs .tab-item[data-target="userManagementContent"] .badge');
+
+    if (!userTableContainer) return;
+
+    userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
+
+    try {
+        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { 
+            headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' } 
+        });
+        if (!response.ok) throw new Error('Failed to fetch users');
+        
+        const users = await response.json();
+        
+        // Update the badge count
+        if (userCountBadge) {
             userCountBadge.textContent = users.length;
-            let tableHTML = `<div class="table-header"><span>Full Name</span><span>Email</span><span>Telephone</span><span>Country</span><span>Wallet Balance</span><span>Registered On</span><span>Status</span><span>Actions</span></div>`;
-            if (users.length > 0) {
-                users.forEach(user => {
-                    const registrationDate = new Date(user.registrationDate).toLocaleString();
-                    tableHTML += `<div class="table-row" data-id="${user.id}"><span>${user.fullName}</span><span>${user.email}</span><span>${user.telephone || 'N/A'}</span><span>${user.country || 'N/A'}</span><span>GH₵ ${parseFloat(user.walletBalance).toFixed(2)}</span><span>${registrationDate}</span><span><span class="status-badge status-active">Active</span></span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div>`;
-                });
-            } else {
-                tableHTML += `<div class="empty-state">No users found.</div>`;
-            }
-            userTableContainer.innerHTML = tableHTML;
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-            userTableContainer.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
+        } else if (headerBadge) {
+            headerBadge.textContent = users.length;
         }
+        
+        let tableHTML = `
+            <div class="table-header">
+                <span>Full Name</span>
+                <span>Email</span>
+                <span>Telephone</span>
+                <span>Country</span>
+                <span>Wallet Balance</span>
+                <span>Registered On</span>
+                <span>Status</span>
+                <span>Actions</span>
+            </div>`;
+        
+        if (users.length > 0) {
+            users.forEach(user => {
+                const registrationDate = new Date(user.registrationDate).toLocaleString();
+                tableHTML += `
+                    <div class="table-row" data-id="${user.id}">
+                        <span>${user.fullName}</span>
+                        <span>${user.email}</span>
+                        <span>${user.telephone || 'N/A'}</span>
+                        <span>${user.country || 'N/A'}</span>
+                        <span>GH₵ ${parseFloat(user.walletBalance).toFixed(2)}</span>
+                        <span>${registrationDate}</span>
+                        <span><span class="status-badge status-active">Active</span></span>
+                        <div class="actions">
+                            <i class="fas fa-edit action-edit"></i>
+                            <i class="fas fa-trash action-delete"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            tableHTML += `<div class="empty-state">No users found.</div>`;
+        }
+        userTableContainer.innerHTML = tableHTML;
+        
+    } catch (error) {
+        console.error('Failed to fetch users:', error);
+        userTableContainer.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
     }
+}
    
 
 
@@ -478,8 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 6. INITIALIZE THE DASHBOARD ---
-    console.log("Step 8: Initializing dashboard by fetching users.");
-    fetchAllUsers();
+    
     fetchAllAnalytics();
    
 });

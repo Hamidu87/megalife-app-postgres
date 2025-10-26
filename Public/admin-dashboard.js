@@ -478,9 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 6. INITIALIZE THE DASHBOARD ---
-    
-    fetchAllAnalytics();
+    console.log("Step 8: Initializing dashboard by fetching users.");
     fetchAllUsers();
+    fetchAllAnalytics();
+   
 });
 
 

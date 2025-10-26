@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. GET ALL UI ELEMENTS ---
     const logoutLink = document.querySelector('.logout-link'); 
-    const tabs = document.querySelectorAll('.content-tabs .tab-item');
+    // CORRECTED: The navigation is now in the sidebar menu
+    const menuItems = document.querySelectorAll('.sidebar-menu .menu-item a');
     const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
     
     // Elements for Bundle Modal
@@ -46,18 +47,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tab Switching Logic
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function (event) {
+    // Tab Switching Logic (CORRECTED for Sidebar Navigation)
+    menuItems.forEach(menuLink => {
+        menuLink.addEventListener('click', function (event) {
             event.preventDefault();
-            tabs.forEach(item => item.classList.remove('active'));
+            // Visually update the sidebar active state
+            menuItems.forEach(item => item.parentElement.classList.remove('active'));
+            this.parentElement.classList.add('active');
+
+            // Show the correct content pane
             contentPanes.forEach(pane => pane.classList.remove('active'));
-            this.classList.add('active');
             const targetPane = document.getElementById(this.getAttribute('data-target'));
             if (targetPane) targetPane.classList.add('active');
             
+            // Fetch data for the clicked tab
             const targetId = this.getAttribute('data-target');
-            if (targetId === 'userManagementContent') fetchAllUsers();
+            if (targetId === 'analyticsContent') fetchAllAnalytics();
+            else if (targetId === 'userManagementContent') fetchAllUsers();
             else if (targetId === 'allTransactionsContent') fetchAllTransactions();
             else if (targetId === 'dataBundlesContent') fetchAllBundles();
             else if (targetId === 'supportContent') fetchAllSettings();
@@ -410,8 +416,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
+
+
+// NEW FUNCTION for fetching and displaying analytics
+    let annualChart = null; // Variable to hold the chart instance
+    async function fetchAllAnalytics() {
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/analytics/summary', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch analytics.');
+            const summary = await response.json();
+
+            // Populate Top-Ups Table
+            document.getElementById('topups-today-count').textContent = summary.topUps.today.count;
+            document.getElementById('topups-today-sum').textContent = summary.topUps.today.sum.toFixed(2);
+            document.getElementById('topups-week-count').textContent = summary.topUps.week.count;
+            document.getElementById('topups-week-sum').textContent = summary.topUps.week.sum.toFixed(2);
+            document.getElementById('topups-month-count').textContent = summary.topUps.month.count;
+            document.getElementById('topups-month-sum').textContent = summary.topUps.month.sum.toFixed(2);
+
+            // Populate Bundles Table
+            document.getElementById('bundles-today-count').textContent = summary.bundles.today.count;
+            document.getElementById('bundles-today-sum').textContent = summary.bundles.today.sum.toFixed(2);
+            document.getElementById('bundles-week-count').textContent = summary.bundles.week.count;
+            document.getElementById('bundles-week-sum').textContent = summary.bundles.week.sum.toFixed(2);
+            document.getElementById('bundles-month-count').textContent = summary.bundles.month.count;
+            document.getElementById('bundles-month-sum').textContent = summary.bundles.month.sum.toFixed(2);
+
+            // Create/Update the Chart
+            const chartCtx = document.getElementById('annualSalesChart').getContext('2d');
+            const labels = summary.annualSales.map(item => item.month);
+            const data = summary.annualSales.map(item => item.total_sales);
+
+            if (annualChart) {
+                annualChart.destroy(); // Destroy old chart before creating a new one
+            }
+            annualChart = new Chart(chartCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Sales (GH₵)',
+                        data: data,
+                        backgroundColor: 'rgba(0, 74, 173, 0.7)',
+                        borderColor: 'rgba(0, 74, 173, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+        } catch (error) {
+            console.error("Failed to load analytics:", error);
+        }
+    }
+
+
+
+
+
+
     // --- 6. INITIALIZE THE DASHBOARD ---
-    fetchAllUsers();
+    fetchAllAnalytics();
 });
 
 

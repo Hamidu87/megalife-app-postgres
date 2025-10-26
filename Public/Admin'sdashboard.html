@@ -7,16 +7,28 @@
       <link rel="icon" type="image/x-icon" href="/favicon.png.png?v=1.1">
     <link rel="stylesheet" href="Megalife.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="admin-container">
-        <!-- The Stable Sidebar -->
+        <!-- The Stable Sidebar (CORRECTED) -->
         <aside class="sidebar">
             <div class="sidebar-header"><div class="logo">M</div><span class="logo-text">MEGALIFE</span></div>
-            <nav class="sidebar-nav"><ul><li class="active"><a href="Admin'sdashboard.html"><i class="fa fa-home"></i><span>Dashboard</span></a></li></ul></nav>
+            <nav class="sidebar-nav">
+                <!-- NEW SIDEBAR NAVIGATION -->
+                <ul class="sidebar-menu">
+                    <li class="menu-item active"><a href="#" data-target="analyticsContent"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="userManagementContent"><i class="fas fa-users"></i><span>User Management</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="allTransactionsContent"><i class="fas fa-list-ul"></i><span>All Transactions</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="dataBundlesContent"><i class="fas fa-box-open"></i><span>Data Bundles</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="apiSettingsContent"><i class="fas fa-cog"></i><span>API Settings</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="supportContent"><i class="fas fa-life-ring"></i><span>Support</span></a></li>
+                    <li class="menu-item"><a href="#" data-target="apiDocsContent"><i class="fas fa-file-alt"></i><span>API Docs</span></a></li>
+                </ul>
+            </nav>
             <div class="sidebar-footer">
                 <div class="user-profile">
-                    <div class="profile-pic-container"><img src="https://i.imgur.com/V320n2c.png" id="profile-pic" alt="Admin Profile"></div>
+                    <div class="profile-pic-container"><img src="UserInterfaces/Assets/images/default-avatar.png" id="profile-pic" alt="Admin Profile"></div>
                     <div class="user-details"><h4 class="user-name">Admin</h4><p class="user-email">admin@megalifeconsult.com</p></div>
                     <a href="admin-login.html" class="logout-link" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
                 </div>
@@ -27,17 +39,18 @@
         <main class="main-content">
             <header class="main-header"><h2>Admin Dashboard</h2></header>
             
-            <nav class="content-tabs">
-                <a href="#" class="tab-item active" data-target="userManagementContent"><i class="fas fa-users"></i> User Management <span class="badge">3</span></a>
-                <a href="#" class="tab-item" data-target="allTransactionsContent"><i class="fas fa-list-ul"></i> All Transactions</a>
-                <a href="#" class="tab-item" data-target="dataBundlesContent"><i class="fas fa-box-open"></i> Data Bundles</a>
-                <a href="#" class="tab-item" data-target="apiSettingsContent"><i class="fas fa-cog"></i> API Settings</a>
-                <a href="#" class="tab-item" data-target="supportContent"><i class="fas fa-life-ring"></i> Support</a>
-                <a href="#" class="tab-item" data-target="apiDocsContent"><i class="fas fa-file-alt"></i> API Docs</a>
-            </nav>
+            <!-- HEADER TABS HAVE BEEN REMOVED -->
 
             <div class="tab-content-wrapper">
 
+                <!-- 1. Analytics Content (NEW) -->
+                <section class="tab-pane active" id="analyticsContent">
+                    <div class="analytics-grid">
+                        <div class="card"><div class="card-header"><h3>Wallet Top-Up Summary</h3></div><table class="summary-table"><thead><tr><th>Period</th><th>Count</th><th>Total (GH₵)</th></tr></thead><tbody><tr><td>Today</td><td id="topups-today-count">0</td><td id="topups-today-sum">0.00</td></tr><tr><td>This Week</td><td id="topups-week-count">0</td><td id="topups-week-sum">0.00</td></tr><tr><td>This Month</td><td id="topups-month-count">0</td><td id="topups-month-sum">0.00</td></tr></tbody></table></div>
+                        <div class="card"><div class="card-header"><h3>Bundle Sales Summary</h3></div><table class="summary-table"><thead><tr><th>Period</th><th>Count</th><th>Total (GH₵)</th></tr></thead><tbody><tr><td>Today</td><td id="bundles-today-count">0</td><td id="bundles-today-sum">0.00</td></tr><tr><td>This Week</td><td id="bundles-week-count">0</td><td id="bundles-week-sum">0.00</td></tr><tr><td>This Month</td><td id="bundles-month-count">0</td><td id="bundles-month-sum">0.00</td></tr></tbody></table></div>
+                        <div class="card chart-container"><div class="card-header"><h3>Annual Sales Performance</h3></div><canvas id="annualSalesChart"></canvas></div>
+                    </div>
+                </section>
                 <!-- 1. User Management Content -->
                 <section class="card tab-pane active" id="userManagementContent">
                     <div class="card-header"><h3>Registered Users</h3><p>View and manage all users on the platform.</p></div>

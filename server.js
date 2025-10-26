@@ -471,7 +471,73 @@ app.get('/admin/transactions', authenticateAdmin, async (req, res) => {
     }
 });
 
+// NEW: GET ANALYTICS SUMMARY DATA
+app.get('/admin/analytics/summary', authenticateAdmin, async (req, res) => {
+    try {
+        const client = await db.connect(); // Get a client for multiple queries
+        try {
+            // --- TOP-UP QUERIES ---
+            const todayTopUpsQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type = 'Top-Up' AND "transactionsDate" >= CURRENT_DATE`;
+            const weekTopUpsQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type = 'Top-Up' AND "transactionsDate" >= date_trunc('week', CURRENT_DATE)`;
+            const monthTopUpsQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type = 'Top-Up' AND "transactionsDate" >= date_trunc('month', CURRENT_DATE)`;
 
+            // --- BUNDLE SALES QUERIES ---
+            const todayBundlesQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type != 'Top-Up' AND "transactionsDate" >= CURRENT_DATE`;
+            const weekBundlesQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type != 'Top-Up' AND "transactionsDate" >= date_trunc('week', CURRENT_DATE)`;
+            const monthBundlesQuery = `SELECT COUNT(*), SUM(amount) FROM transactions WHERE type != 'Top-Up' AND "transactionsDate" >= date_trunc('month', CURRENT_DATE)`;
+            
+            // --- ANNUAL SALES CHART QUERY ---
+            // This is a complex query to get sales for each of the last 12 months
+            const annualSalesQuery = `
+                SELECT 
+                    to_char(date_trunc('month', month_series), 'Mon YYYY') AS month,
+                    COALESCE(SUM(t.amount), 0) AS total_sales
+                FROM 
+                    generate_series(date_trunc('month', current_date - interval '11 months'), current_date, '1 month') AS month_series
+                LEFT JOIN 
+                    transactions t ON date_trunc('month', t."transactionsDate") = month_series AND t.type != 'Top-Up'
+                GROUP BY 
+                    month_series
+                ORDER BY 
+                    month_series;
+            `;
+
+            // Run all queries in parallel for maximum speed
+            const [
+                todayTopUpsRes, weekTopUpsRes, monthTopUpsRes,
+                todayBundlesRes, weekBundlesRes, monthBundlesRes,
+                annualSalesRes
+            ] = await Promise.all([
+                client.query(todayTopUpsQuery), client.query(weekTopUpsQuery), client.query(monthTopUpsQuery),
+                client.query(todayBundlesQuery), client.query(weekBundlesQuery), client.query(monthBundlesQuery),
+                client.query(annualSalesQuery)
+            ]);
+            
+            // Assemble the final data object
+            const summary = {
+                topUps: {
+                    today: { count: parseInt(todayTopUpsRes.rows[0].count), sum: parseFloat(todayTopUpsRes.rows[0].sum) || 0 },
+                    week: { count: parseInt(weekTopUpsRes.rows[0].count), sum: parseFloat(weekTopUpsRes.rows[0].sum) || 0 },
+                    month: { count: parseInt(monthTopUpsRes.rows[0].count), sum: parseFloat(monthTopUpsRes.rows[0].sum) || 0 },
+                },
+                bundles: {
+                    today: { count: parseInt(todayBundlesRes.rows[0].count), sum: parseFloat(todayBundlesRes.rows[0].sum) || 0 },
+                    week: { count: parseInt(weekBundlesRes.rows[0].count), sum: parseFloat(weekBundlesRes.rows[0].sum) || 0 },
+                    month: { count: parseInt(monthBundlesRes.rows[0].count), sum: parseFloat(monthBundlesRes.rows[0].sum) || 0 },
+                },
+                annualSales: annualSalesRes.rows // This will be an array of { month: 'Sep 2025', total_sales: '123.45' }
+            };
+
+            res.status(200).json(summary);
+
+        } finally {
+            client.release(); // ALWAYS release the client
+        }
+    } catch (error) {
+        console.error('Error fetching analytics summary:', error);
+        res.status(500).json({ message: 'Server error while fetching analytics.' });
+    }
+});
 
 
 // UPDATE A USER'S DETAILS

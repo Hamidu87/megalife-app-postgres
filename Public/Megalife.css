@@ -777,7 +777,7 @@ body { font-family: var(--font-family); margin: 0; color: var(--text-dark); }
 .service-card.airteltigo {
     /* Gradient from blue to red */
     background: linear-gradient(to bottom, var(--airteltigo-blue) 50%, var(--airteltigo-red) 50%);
-    color: #8946db; /* White text */
+    color: hsl(300, 33%, 99%); /* White text */
 }
 .service-card.airteltigo p { color: rgba(255, 255, 255, 0.9); }
 

@@ -82,6 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+/*
+
 // This script now handles the primary security check and the layout for all protected pages.
 
 function initializeLayout() {
@@ -154,5 +158,115 @@ window.addEventListener('pageshow', function(event) {
             // is always fresh, even when loaded from the back-forward cache.
             initializeLayout();
         }
+    }
+});
+
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+// This script now handles layout, security, and layout events for all protected pages.
+document.addEventListener('DOMContentLoaded', () => {
+
+    // This is the primary security check. It runs before anything else.
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // If no token exists, the user is not logged in. Redirect immediately.
+        // .replace() is better for logins as it removes the current page from history.
+        window.location.replace('../login.html');
+        return; // Stop the script from running any further.
+    }
+
+    const sidebarPlaceholder = document.querySelector('aside.sidebar');
+    const headerPlaceholder = document.querySelector('header.main-header');
+    
+    // Only proceed if the page has the necessary layout placeholders.
+    if (sidebarPlaceholder && headerPlaceholder) {
+        
+        async function loadLayout() {
+            try {
+                const [sidebarResponse, headerResponse] = await Promise.all([
+                    fetch('Sidebar.html'),
+                    fetch('Header.html')
+                ]);
+
+                if (!sidebarResponse.ok || !headerResponse.ok) {
+                    throw new Error('Layout files (Sidebar.html or Header.html) not found.');
+                }
+                
+                sidebarPlaceholder.innerHTML = await sidebarResponse.text();
+                headerPlaceholder.innerHTML = await headerResponse.text();
+
+                // Now that the HTML is on the page, set up all its event listeners.
+                setupLayoutEventListeners();
+
+                // Announce to other scripts (like dashboard.js) that the layout is ready.
+                document.dispatchEvent(new CustomEvent('layoutReady'));
+
+            } catch(error) {
+                console.error("Fatal Error: Could not load page layout.", error);
+            }
+        }
+
+        function setupLayoutEventListeners() {
+            // --- Handle Logout ---
+            const logoutLink = document.querySelector('.logout-link a');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.clear();
+                    window.location.replace('../login.html');
+                });
+            }
+
+            // --- Handle Hamburger Menu for Mobile ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('sidebar-open');
+                });
+            }
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', () => {
+                    document.body.classList.remove('sidebar-open');
+                });
+            }
+
+            // --- Handle Submenu Toggle ---
+            const submenuToggle = document.querySelector('.sidebar-nav .has-submenu > a');
+            if (submenuToggle) {
+                submenuToggle.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    this.parentElement.classList.toggle('open');
+                });
+            }
+            
+            // --- Handle Active Link Highlighting ---
+            const currentPage = window.location.pathname.split('/').pop();
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.parentElement.classList.add('active');
+                    const submenu = link.closest('.submenu');
+                    if (submenu) submenu.parentElement.classList.add('open');
+                }
+            });
+        }
+
+        // Run the function to build the page layout
+        loadLayout();
     }
 });

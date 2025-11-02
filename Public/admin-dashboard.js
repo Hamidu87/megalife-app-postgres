@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'dataBundlesContent') fetchAllBundles();
             else if (targetId === 'supportContent') fetchAllSettings();
             else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
+            
         });
     });
 
@@ -427,9 +428,58 @@ async function fetchAllUsers() {
 
 
 
+async function fetchAllBundles() {
+    const bundlesContainer = document.querySelector('#dataBundlesContent');
+    if (!bundlesContainer) return;
+    try {
+        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!response.ok) throw new Error('Failed to fetch bundles.');
+        const bundles = await response.json();
+        
+        const bundlesByProvider = { MTN: [], AirtelTigo: [], Telecel: [] };
+        bundles.forEach(bundle => { if (bundlesByProvider[bundle.provider]) bundlesByProvider[bundle.provider].push(bundle); });
+
+        ['MTN', 'AirtelTigo', 'Telecel'].forEach(provider => {
+            const card = bundlesContainer.querySelector(`.bundle-title.${provider.toLowerCase()}`).closest('.bundle-card');
+            const tableBody = card.querySelector('.bundle-table .table-body');
+            const tableHeader = card.querySelector('.bundle-table .the-header'); // Find the header
+            
+            // 1. UPDATE THE TABLE HEADER TO HAVE 4 COLUMNS
+            if (tableHeader) {
+                tableHeader.innerHTML = `<span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span>`;
+            }
+
+            if (tableBody) {
+                tableBody.innerHTML = '';
+                const providerBundles = bundlesByProvider[provider];
+                if (providerBundles && providerBundles.length > 0) {
+                    providerBundles.forEach(bundle => {
+                        // 2. ADD THE SUPPLIER PRICE DATA CELL
+                        tableBody.innerHTML += `
+                            <div class="table-row" data-id="${bundle.id}">
+                                <span>${bundle.volume}</span>
+                                <span>${parseFloat(bundle.price).toFixed(2)}</span>
+                                <span>${parseFloat(bundle.supplierPrice).toFixed(2)}</span>
+                                <div class="actions">
+                                    <i class="fas fa-edit action-edit"></i>
+                                    <i class="fas fa-trash action-delete"></i>
+                                </div>
+                            </div>`;
+                    });
+                }
+            }
+        });
+    } catch (error) { console.error('Error fetching/rendering bundles:', error); }
+}
 
 
 
+
+
+
+
+
+/*
     async function fetchAllBundles() {
         const bundlesContainer = document.querySelector('#dataBundlesContent');
         if (!bundlesContainer) return;
@@ -456,6 +506,9 @@ async function fetchAllUsers() {
             console.error('Error fetching/rendering bundles:', error); 
         }
     }
+*/
+
+
 
     async function fetchAllSettings() {
         if (!whatsappLinkInput) return;
@@ -528,29 +581,20 @@ async function fetchAllUsers() {
 
 
     // NEW FUNCTION for fetching and displaying profit analytics
-    async function fetchProfitAnalytics() {
+   async function fetchProfitAnalytics() {
         try {
             const response = await fetch('https://megalife-app-postgres.onrender.com/admin/analytics/profit', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch profit analytics.');
-            
             const summary = await response.json();
-
-            // Populate the new Profit Summary Table
             document.getElementById('profit-today').textContent = summary.today.toFixed(2);
             document.getElementById('profit-week').textContent = summary.week.toFixed(2);
             document.getElementById('profit-month').textContent = summary.month.toFixed(2);
-
         } catch (error) {
             console.error("Failed to load profit analytics:", error);
-            // Optionally show an error message in the table
-            document.getElementById('profit-today').textContent = 'Error';
-            document.getElementById('profit-week').textContent = 'Error';
-            document.getElementById('profit-month').textContent = 'Error';
         }
     }
-
 
 
 

@@ -286,24 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Replace the existing fetchAllUsers function in your admin-dashboard.js
 async function fetchAllUsers() {
-    const userTableContainer = document.querySelector('#userManagementContent .user-table');
-    const userCountBadge = document.querySelector('.sidebar-menu a[data-target="userManagementContent"] .badge'); // We need to add this badge to the HTML
-    
-    // Fallback for the old header tab badge
-    const headerBadge = document.querySelector('.content-tabs .tab-item[data-target="userManagementContent"] .badge');
+        const userTableContainer = document.querySelector('#userManagementContent .user-table');
+        const userCountBadge = document.querySelector('.menu-item a[data-target="userManagementContent"] .badge');
+        if (!userTableContainer) return;
 
-    if (!userTableContainer) return;
-
-    userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
-
-    try {
-        const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { 
-            headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' } 
-        });
-        if (!response.ok) throw new Error('Failed to fetch users');
-        
-        const users = await response.json();
-        
+        userTableContainer.innerHTML = '<div class="empty-state">Loading users...</div>';
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/users', { 
+                headers: { 'Authorization': `Bearer ${token}` } 
+            });
+            if (!response.ok) throw new Error('Failed to fetch users');
+            
+            const users = await response.json();
         // Update the badge count
         if (userCountBadge) {
             userCountBadge.textContent = users.length;
@@ -527,7 +521,7 @@ async function fetchAllBundles() {
 
 
 // NEW FUNCTION for fetching and displaying analytics
-    let annualChart = null; // Variable to hold the chart instance
+     let annualChart = null;
     async function fetchAllAnalytics() {
         try {
             const response = await fetch('https://megalife-app-postgres.onrender.com/admin/analytics/summary', {
@@ -535,7 +529,6 @@ async function fetchAllBundles() {
             });
             if (!response.ok) throw new Error('Failed to fetch analytics.');
             const summary = await response.json();
-
             // Populate Top-Ups Table
             document.getElementById('topups-today-count').textContent = summary.topUps.today.count;
             document.getElementById('topups-today-sum').textContent = summary.topUps.today.sum.toFixed(2);
@@ -554,6 +547,7 @@ async function fetchAllBundles() {
 
             // Create/Update the Chart
             const chartCtx = document.getElementById('annualSalesChart').getContext('2d');
+            
             const labels = summary.annualSales.map(item => item.month);
             const data = summary.annualSales.map(item => item.total_sales);
 

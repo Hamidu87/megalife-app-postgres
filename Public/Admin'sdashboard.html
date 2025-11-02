@@ -17,6 +17,7 @@
             <nav class="sidebar-nav">
                 <!-- NEW SIDEBAR NAVIGATION -->
                 <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="#" data-target="profitAnalyticsContent"><i class="fas fa-dollar-sign"></i><span>Profit Analytics</span></a></li>
                     <li class="menu-item active"><a href="#" data-target="analyticsContent"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
                     <li class="menu-item">
     <a href="#" data-target="userManagementContent">
@@ -45,9 +46,43 @@
         <main class="main-content">
             <header class="main-header"><h2>Admin Dashboard</h2></header>
             
-            <!-- HEADER TABS HAVE BEEN REMOVED -->
 
             <div class="tab-content-wrapper">
+
+                <!-- 2. ADDED PROFIT ANALYTICS CONTENT PANE -->
+<section class="tab-pane" id="profitAnalyticsContent">
+                    <div class="page-header">
+                        <h3>Profit Analytics</h3>
+                        <p>Summary of profits calculated from data bundle sales (Selling Price - Supplier Cost).</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>Profit Summary</h3></div>
+                        <table class="summary-table" id="profit-summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Total Profit (GH₵)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Today</td>
+                                    <td id="profit-today">0.00</td>
+                                </tr>
+                                <tr>
+                                    <td>This Week</td>
+                                    <td id="profit-week">0.00</td>
+                                </tr>
+                                <tr>
+                                    <td>This Month</td>
+                                    <td id="profit-month">0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
 
                 <!-- 1. Analytics Content (NEW) -->
                 <section class="tab-pane active" id="analyticsContent">
@@ -151,13 +186,6 @@
                 <button type="button" id="cancel-btn">Cancel</button>
                 <button type="submit" id="save-btn">Save Bundle</button>
             </div>
-
-
-
-
-
-
-
 
         </form>
     </div>

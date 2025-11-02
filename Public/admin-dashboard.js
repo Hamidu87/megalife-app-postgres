@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'allTransactionsContent') fetchAllTransactions();
             else if (targetId === 'dataBundlesContent') fetchAllBundles();
             else if (targetId === 'supportContent') fetchAllSettings();
+            else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
         });
     });
 
@@ -526,6 +527,29 @@ async function fetchAllUsers() {
     }
 
 
+    // NEW FUNCTION for fetching and displaying profit analytics
+    async function fetchProfitAnalytics() {
+        try {
+            const response = await fetch('https://megalife-app-postgres.onrender.com/admin/analytics/profit', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch profit analytics.');
+            
+            const summary = await response.json();
+
+            // Populate the new Profit Summary Table
+            document.getElementById('profit-today').textContent = summary.today.toFixed(2);
+            document.getElementById('profit-week').textContent = summary.week.toFixed(2);
+            document.getElementById('profit-month').textContent = summary.month.toFixed(2);
+
+        } catch (error) {
+            console.error("Failed to load profit analytics:", error);
+            // Optionally show an error message in the table
+            document.getElementById('profit-today').textContent = 'Error';
+            document.getElementById('profit-week').textContent = 'Error';
+            document.getElementById('profit-month').textContent = 'Error';
+        }
+    }
 
 
 

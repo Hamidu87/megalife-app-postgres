@@ -592,8 +592,12 @@ app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
 // CREATE a new bundle
 app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const { provider, volume, price } = req.body;
-        await db.query('INSERT INTO bundles (provider, volume, price) VALUES ($1, $2, $3)', [provider, volume, price]);
+       const { provider, volume, price, supplierPrice } = req.body; // Add supplierPrice here
+// ...
+await db.query(
+    'INSERT INTO bundles (provider, volume, price, "supplierPrice") VALUES ($1, $2, $3, $4)',
+    [provider, volume, price, supplierPrice]
+);
         res.status(201).json({ message: 'Bundle created successfully.' });
     } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });
@@ -602,8 +606,12 @@ app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
 app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { provider, volume, price } = req.body;
-        await db.query('UPDATE bundles SET provider = $1, volume = $2, price = $3 WHERE id = $4', [provider, volume, price, id]);
+        const { volume, price, supplierPrice } = req.body; // Add supplierPrice here
+// ...
+await db.query(
+    'UPDATE bundles SET volume = $1, price = $2, "supplierPrice" = $3 WHERE id = $4',
+    [volume, price, supplierPrice, id]
+);
         res.status(200).json({ message: 'Bundle updated successfully.' });
     } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });

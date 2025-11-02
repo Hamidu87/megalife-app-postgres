@@ -216,6 +216,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (modal) modal.hidden = false;
     }
+
+
+
+
+    
+
+
+
+
     function closeBundleModal() { if (modal) modal.hidden = true; }
     async function handleBundleFormSubmit(e) {
         e.preventDefault();
@@ -224,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
             provider: document.getElementById('bundle-provider').value,
             volume: document.getElementById('bundle-volume').value,
             price: document.getElementById('bundle-price').value,
+            supplierPrice: document.getElementById('bundle-supplier-price').value,
         };
         const isEditing = !!id;
         const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/bundles`;

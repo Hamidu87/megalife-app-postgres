@@ -146,6 +146,30 @@
                 <button type="button" id="cancel-btn">Cancel</button>
                 <button type="submit" id="save-btn">Save Bundle</button>
             </div>
+
+
+<!-- ... inside the bundle-form ... -->
+<div class="form-group-modal">
+    <label for="bundle-volume">Volume (e.g., 5GB)</label>
+    <input type="text" id="bundle-volume" required>
+</div>
+<div class="form-group-modal">
+    <label for="bundle-price">Selling Price (GH₵)</label>
+    <input type="number" step="0.01" id="bundle-price" required>
+</div>
+
+<!-- ADD THIS NEW INPUT FIELD -->
+<div class="form-group-modal">
+    <label for="bundle-supplier-price">Supplier Cost (GH₵)</label>
+    <input type="number" step="0.01" id="bundle-supplier-price" required>
+</div>
+
+<div class="modal-actions">
+    <!-- ... buttons ... -->
+</div>
+
+
+
         </form>
     </div>
 </div>

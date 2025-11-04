@@ -67,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'allTransactionsContent') fetchAllTransactions();
             else if (targetId === 'dataBundlesContent') fetchAllBundles();
             else if (targetId === 'supportContent') fetchAllSettings();
-            else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
             
+            else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
         });
     });
 
@@ -575,31 +575,36 @@ async function fetchAllBundles() {
 
 
     // NEW FUNCTION for fetching and displaying profit analytics
-   async function fetchProfitAnalytics() {
+   
+
+// NEW FUNCTION for fetching and displaying profit analytics
+    async function fetchProfitAnalytics() {
+        const todayEl = document.getElementById('profit-today');
+        const weekEl = document.getElementById('profit-week');
+        const monthEl = document.getElementById('profit-month');
+        if (!todayEl) return; // Only run if we are on the right page
+
         try {
             const response = await fetch('https://megalife-app-postgres.onrender.com/admin/analytics/profit', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch profit analytics.');
+            
             const summary = await response.json();
-            document.getElementById('profit-today').textContent = summary.today.toFixed(2);
-            document.getElementById('profit-week').textContent = summary.week.toFixed(2);
-            document.getElementById('profit-month').textContent = summary.month.toFixed(2);
+            
+            todayEl.textContent = summary.today.toFixed(2);
+            weekEl.textContent = summary.week.toFixed(2);
+            monthEl.textContent = summary.month.toFixed(2);
+
         } catch (error) {
             console.error("Failed to load profit analytics:", error);
         }
     }
 
-
-
     // --- 6. INITIALIZE THE DASHBOARD ---
-    
+    // The default tab is Analytics, so we call its function on page load.
     fetchAllAnalytics();
-   
 });
-
-
-
 
 
 

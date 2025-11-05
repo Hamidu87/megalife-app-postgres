@@ -105,10 +105,33 @@
                 </section>
 
                 <!-- 3. Data Bundles Content -->
+               <!-- 3. Data Bundles Content (CORRECTED) -->
                 <section class="tab-pane data-bundles-grid" id="dataBundlesContent">
-                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p class="bundle-description">Manage data bundles for MTN.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>1GB</span><span>5.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div><div class="table-row"><span>5GB</span><span>20.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
-                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title airteltigo"><i class="fas fa-circle"></i> AirtelTigo</h3><p class="bundle-description">Manage data bundles for AirtelTigo.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>2GB</span><span>10.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
-                    <div class="bundle-card"><div class="bundle-card-header"><h3 class="bundle-title telecel"><i class="fas fa-circle"></i> Telecel</h3><p class="bundle-description">Manage data bundles for Telecel.</p></div><div class="bundle-table"><div class="table-header"><span>Volume</span><span>Price (GH₵)</span><span>Actions</span></div><div class="table-body"><div class="table-row"><span>10GB</span><span>30.00</span><div class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></div></div></div></div><div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div></div>
+                    <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p>Manage data bundles for MTN.</p></div>
+                        <div class="bundle-table">
+                            <!-- ADDED SUPPLIER COST HEADER -->
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
+                    <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title airteltigo"><i class="fas fa-circle"></i> AirtelTigo</h3><p>Manage bundles for AirtelTigo.</p></div>
+                        <div class="bundle-table">
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
+                    <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title telecel"><i class="fas fa-circle"></i> Telecel</h3><p>Manage bundles for Telecel.</p></div>
+                        <div class="bundle-table">
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
                 </section>
 
                 <!-- 4. API Settings Content -->

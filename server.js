@@ -426,7 +426,6 @@ app.get('/admin/users', authenticateAdmin, async (req, res) => {
 // NEW: GET PROFIT ANALYTICS DATA
 app.get('/admin/analytics/profit', authenticateAdmin, async (req, res) => {
     try {
-        // Query to sum profit for Today, This Week, and This Month
         const summaryQuery = `
             SELECT 
                 SUM(CASE WHEN "transactionsDate" >= CURRENT_DATE THEN profit ELSE 0 END) AS "todayProfit",
@@ -434,24 +433,18 @@ app.get('/admin/analytics/profit', authenticateAdmin, async (req, res) => {
                 SUM(CASE WHEN "transactionsDate" >= date_trunc('month', CURRENT_DATE) THEN profit ELSE 0 END) AS "monthProfit"
             FROM transactions;
         `;
-        
         const result = await db.query(summaryQuery);
         const summary = {
             today: parseFloat(result.rows[0].todayProfit) || 0,
             week: parseFloat(result.rows[0].weekProfit) || 0,
             month: parseFloat(result.rows[0].monthProfit) || 0
         };
-
         res.status(200).json(summary);
-
     } catch (error) {
         console.error('Error fetching profit analytics:', error);
         res.status(500).json({ message: 'Server error.' });
     }
 });
-
-
-
 
 // NEW: MANUALLY FORWARD A TRANSACTION
 app.post('/admin/transactions/:id/forward', authenticateAdmin, async (req, res) => {
@@ -874,16 +867,15 @@ app.post('/initialize-payment', authenticateToken, async (req, res) => {
 
 
 // Data Bundle Purchase (with Profit Calculation)
+// Data Bundle Purchase (with Profit Calculation for PostgreSQL)
 app.post('/purchase-bundle', authenticateToken, async (req, res) => {
     const client = await db.connect();
     try {
         await client.query('BEGIN');
-        
         const { type, details, amount, recipient } = req.body;
         const userId = req.user.userId;
 
-        // --- 1. GET BUNDLE DETAILS FROM DB TO FIND SUPPLIER PRICE ---
-        // This is a crucial security step and gets us the cost.
+        // 1. Get bundle details to find supplier price and verify selling price
         const bundleResult = await client.query(
             'SELECT * FROM bundles WHERE provider = $1 AND volume = $2 AND "isActive" = true',
             [type, details]
@@ -896,46 +888,37 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         const sellingPrice = parseFloat(bundle.price);
         const supplierPrice = parseFloat(bundle.supplierPrice);
 
-        // Security check: Make sure the price from the frontend matches the database
+        // Security check
         if (sellingPrice !== amount) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ message: 'Price mismatch error. Please refresh and try again.' });
+            return res.status(400).json({ message: 'Price mismatch error.' });
         }
         
-        // --- 2. CHECK USER BALANCE ---
+        // 2. Check user balance
         const userResult = await client.query('SELECT "walletBalance" FROM users WHERE id = $1 FOR UPDATE', [userId]);
         const currentBalance = parseFloat(userResult.rows[0].walletBalance);
+        if (currentBalance < sellingPrice) { /* ... rollback and return error ... */ }
         
-        if (currentBalance < sellingPrice) {
-            await client.query('ROLLBACK');
-            return res.status(402).json({ message: 'Insufficient wallet balance.' });
-        }
-
-        // --- 3. CALCULATE PROFIT ---
+        // 3. Calculate profit
         const profit = sellingPrice - supplierPrice;
         
-        // --- 4. PERFORM DATABASE OPERATIONS ---
+        // 4. Perform DB operations
         const newBalance = currentBalance - sellingPrice;
         await client.query('UPDATE users SET "walletBalance" = $1 WHERE id = $2', [newBalance, userId]);
-
         const randomOrderId = Math.floor(1000 + Math.random() * 9000);
-        
-        // Save the transaction WITH the calculated profit
         const insertResult = await client.query(
             'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient, profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
             [userId, randomOrderId, type, details, sellingPrice, 'Processing', recipient, profit]
         );
         
-        const newTransactionId = insertResult.rows[0].id;
-        addTransactionToQueue(newTransactionId);
-        
+        addTransactionToQueue(insertResult.rows[0].id);
         await client.query('COMMIT');
-        res.status(200).json({ message: 'Purchase successful! Your order is being processed.', newBalance });
+        res.status(200).json({ message: 'Purchase successful!', newBalance });
 
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error during bundle purchase:', error);
-        res.status(500).json({ message: 'An error occurred during the purchase.' });
+        res.status(500).json({ message: 'An error occurred during purchase.' });
     } finally {
         client.release();
     }

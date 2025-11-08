@@ -867,65 +867,84 @@ app.post('/initialize-payment', authenticateToken, async (req, res) => {
 
 
 // Data Bundle Purchase (with Profit Calculation)
-// Data Bundle Purchase (with Profit Calculation for PostgreSQL)
+// Data Bundle Purchase (Final Corrected Version with Profit and Security)
 app.post('/purchase-bundle', authenticateToken, async (req, res) => {
     const client = await db.connect();
     try {
-        await client.query('BEGIN');
+        await client.query('BEGIN'); // Start a secure transaction block
+
         const { type, details, amount, recipient } = req.body;
         const userId = req.user.userId;
 
-        // 1. Get bundle details to find supplier price and verify selling price
+        // --- 1. VERIFY THE PRODUCT AND PRICE ---
+        // Get bundle details from YOUR database to find the official selling price and supplier price
         const bundleResult = await client.query(
             'SELECT * FROM bundles WHERE provider = $1 AND volume = $2 AND "isActive" = true',
             [type, details]
         );
+
         if (bundleResult.rows.length === 0) {
             await client.query('ROLLBACK');
             return res.status(404).json({ message: 'This bundle is no longer available.' });
         }
+        
         const bundle = bundleResult.rows[0];
         const sellingPrice = parseFloat(bundle.price);
-        const supplierPrice = parseFloat(bundle.supplierPrice);
+        const supplierPrice = parseFloat(bundle.supplierPrice); // Assuming you have this column
 
-        // Security check
+        // Security Check: Ensure the price sent from the frontend matches the price in your database
         if (sellingPrice !== amount) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ message: 'Price mismatch error.' });
+            return res.status(400).json({ message: 'Price mismatch error. Please refresh and try again.' });
         }
         
-        // 2. Check user balance
+        // --- 2. CHECK USER BALANCE (THIS IS THE CRITICAL FIX) ---
         const userResult = await client.query('SELECT "walletBalance" FROM users WHERE id = $1 FOR UPDATE', [userId]);
         const currentBalance = parseFloat(userResult.rows[0].walletBalance);
-        if (currentBalance < sellingPrice) { /* ... rollback and return error ... */ }
         
-        // 3. Calculate profit
+        // If the user's current balance is less than the official selling price, stop the transaction.
+        if (currentBalance < sellingPrice) {
+            await client.query('ROLLBACK'); // Cancel all changes
+            return res.status(402).json({ message: 'Insufficient wallet balance. Please top up your wallet.' });
+        }
+        
+        // --- 3. IF CHECKS PASS, PROCESS THE TRANSACTION ---
+
+        // Calculate the profit for this transaction
         const profit = sellingPrice - supplierPrice;
         
-        // 4. Perform DB operations
+        // Deduct the amount from the user's wallet
         const newBalance = currentBalance - sellingPrice;
         await client.query('UPDATE users SET "walletBalance" = $1 WHERE id = $2', [newBalance, userId]);
+        
+        // Create a new order ID
         const randomOrderId = Math.floor(1000 + Math.random() * 9000);
+
+        // Insert the complete transaction record, including the calculated profit
         const insertResult = await client.query(
             'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient, profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
             [userId, randomOrderId, type, details, sellingPrice, 'Processing', recipient, profit]
         );
         
+        // Add the new transaction to the background queue for forwarding
         addTransactionToQueue(insertResult.rows[0].id);
+        
+        // If all database operations succeed, save them permanently
         await client.query('COMMIT');
-        res.status(200).json({ message: 'Purchase successful!', newBalance });
+        
+        // Send a success response to the user
+        res.status(200).json({ message: 'Purchase successful! Your order is being processed.', newBalance });
 
     } catch (error) {
+        // If any step in the 'try' block fails, undo all database changes
         await client.query('ROLLBACK');
         console.error('Error during bundle purchase:', error);
-        res.status(500).json({ message: 'An error occurred during purchase.' });
+        res.status(500).json({ message: 'An error occurred during the purchase.' });
     } finally {
+        // Always release the database client back to the pool
         client.release();
     }
 });
-
-
-
 
 
 

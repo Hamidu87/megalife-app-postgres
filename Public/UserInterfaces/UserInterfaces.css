@@ -270,6 +270,8 @@ body {
     --font-family: 'Poppins', sans-serif;
 }
 
+
+
 /* --- General Styles --- */
 * {
     margin: 0;
@@ -402,11 +404,11 @@ body {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
 
-.notice-bar {
+.notice-bar-MTN {
     display: flex;
     align-items: center;
     gap: 15px;
-    background-color: #f0f5fb;
+    background-color: #cfca5b;
     border-left: 4px solid var(--primary-blue);
     padding: 15px;
     border-radius: 8px;
@@ -418,11 +420,10 @@ body {
     font-size: 20px;
 }
 
-.notice-text p {
+.notice-text-MTN p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: #070707
 }
-
 /* Purchase Section */
 .purchase-section {
     display: flex;
@@ -437,13 +438,13 @@ body {
     max-width: 400px;
 }
 
-.purchase-form-card {
-    background-color: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid var(--border-color);
-    width: 100%;
+.purchase-form-card-yellow {
+  background-color: #f0d90a; 
+  border: 1px solid  #f1e104; 
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  width: 100%;
     max-width: 400px;
 }
 
@@ -502,11 +503,21 @@ body {
     --cta-yellow: #FBC02D;
     --bg-light: #5390cd;
     --sidebar-bg: #d52e2e;
-    --card-bg: #FFFFFF;
+    --card-bg: #d5e8e9f9;
     --text-dark: #212529;
     --text-muted: #6C757D;
     --border-color: #E9EDF4;
     --font-family: 'Poppins', sans-serif;
+}
+
+.purchase-form-card-red {
+  background-color: #f34005; 
+  border: 1px solid  #edede7; 
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  width: 100%;
+    max-width: 400px;
 }
 
 /* --- General Styles --- */
@@ -640,11 +651,11 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
-.notice-bar {
+.notice-bar-red {
     display: flex;
     align-items: center;
     gap: 15px;
-    background-color: #f0f5fb;
+    background-color: #e65d30;
     border-left: 4px solid var(--primary-blue);
     padding: 15px;
     border-radius: 8px;
@@ -656,9 +667,9 @@ body {
     font-size: 20px;
 }
 
-.notice-text p {
+.notice-text-red p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: #070707
 }
 .notice-text p:first-of-type {
     color: var(--text-dark);
@@ -735,27 +746,31 @@ body {
 /* --- Add these new styles to the BOTTOM of your existing style.css file --- */
 
 /* Styles for the multi-line notice bar */
-.notice-bar {
+.notice-bar-blue1 {
     /* Adjusting to allow for multiple lines */
     display: flex;
     flex-direction: column;
     align-items: flex-start; /* Align items to the left */
     gap: 10px; /* Space between lines */
     border-left: 4px solid #FBC02D; /* Orange border for warning */
+     background-color: #5129ca;
+     border-radius: 8px;
+     margin-bottom: 30px;
+     padding: 15px;
 }
 
 .notice-bar i {
     color: #FBC02D; /* Orange icon color */
 }
 
-.notice-header {
+.notice-header-blue {
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 600;
 }
 
-.notice-item {
+.notice-item-blue {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -780,6 +795,16 @@ body {
     --brand-yellow: #FBC02D;
 }
 
+
+.purchase-form-card-blue {
+  background-color: #4f3dc9; 
+  border: 1px solid  #e61919; 
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  width: 100%;
+    max-width: 400px;
+}
 /* Updated service logos for active state */
 .service-logos .logo-item {
     padding: 15px;
@@ -917,7 +942,7 @@ body {
     --brand-yellow: #FBC02D;
     --bg-light: #bfd5b6;
     --sidebar-bg: #4ababa;
-    --card-bg: #cddee1;
+  
     --text-dark: #212529;
     --text-muted: #111211;
     --border-color: #e5f0f0;

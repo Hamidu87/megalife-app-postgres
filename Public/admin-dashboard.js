@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // CORRECTED: The navigation is now in the sidebar menu
     const menuItems = document.querySelectorAll('.sidebar-menu .menu-item a');
     const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
+    const menuToggle = document.getElementById('admin-menu-toggle');
+    const sidebarOverlay = document.getElementById('admin-sidebar-overlay');
 
     // Elements for Bundle Modal
     const modal = document.getElementById('bundle-modal');
@@ -202,12 +204,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 // NEW: Hamburger Menu Logic
+    // NEW: Hamburger Menu Logic
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
+            // Adds or removes the 'admin-sidebar-open' class from the body
             document.body.classList.toggle('admin-sidebar-open');
         });
     }
     if (sidebarOverlay) {
+        // Clicking the dark overlay will also close the sidebar
         sidebarOverlay.addEventListener('click', () => {
             document.body.classList.remove('admin-sidebar-open');
         });

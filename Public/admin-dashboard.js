@@ -201,6 +201,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+// NEW: Hamburger Menu Logic
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            document.body.classList.toggle('admin-sidebar-open');
+        });
+    }
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', () => {
+            document.body.classList.remove('admin-sidebar-open');
+        });
+    }
+
+
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     
     function openBundleModal(bundle = null) {

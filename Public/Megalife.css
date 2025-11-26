@@ -863,30 +863,86 @@ body { font-family: var(--font-family); margin: 0; color: var(--text-dark); line
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* --- Responsive Media Query --- */
+/* --- Tablet & Smaller (992px and below) --- */
 @media (max-width: 992px) {
     .sidebar {
         position: fixed;
-        left: -250px; /* Hide sidebar off-screen */
-        z-index: 1001; /* Above the overlay */
+        left: -250px;
+        z-index: 1001;
         box-shadow: 0 0 20px rgba(0,0,0,0.2);
         transition: left 0.3s ease-in-out;
     }
-
     .main-content {
-        margin-left: 0; /* Main content takes full width */
+        margin-left: 0;
     }
-
     .menu-toggle {
-        display: block; /* Show the hamburger icon */
+        display: block;
     }
-    
-    /* This class will be toggled by JavaScript */
     body.admin-sidebar-open .sidebar {
-        left: 0; /* Slide the sidebar into view */
+        left: 0;
     }
     body.admin-sidebar-open .sidebar-overlay {
         opacity: 1;
         visibility: visible;
+    }
+
+    /* Make grid layouts stack into a single column */
+    .analytics-grid,
+    .support-grid,
+    .api-docs-grid {
+        grid-template-columns: 1fr;
+    }
+    .chart-container {
+        grid-column: auto; /* Reset the chart span */
+    }
+}
+
+/* --- Mobile (768px and below) --- */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 15px; /* Reduce padding on smaller screens */
+    }
+    .main-header h2 {
+        font-size: 20px;
+    }
+    .card-header {
+        padding: 20px;
+    }
+    .card-header h3 {
+        font-size: 18px;
+    }
+
+    /* Make the data bundle cards stack */
+    .data-bundles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Make tables horizontally scrollable */
+    /* This is the best way to handle wide tables on small screens */
+    .user-table,
+    .transactions-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+    .user-table .table-header, .user-table .table-row,
+    .transactions-table .table-header, .transactions-table .table-row {
+        min-width: 800px; /* Force a scrollbar if the screen is too narrow */
+    }
+}
+
+/* --- Small Mobile (480px and below) --- */
+@media (max-width: 480px) {
+    .content-tabs {
+        /* Allow tabs to take full width and stack if needed */
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .tab-item {
+        justify-content: center;
+    }
+    .modal-content {
+        padding: 20px;
     }
 }

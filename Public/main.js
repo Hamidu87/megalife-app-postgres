@@ -75,6 +75,21 @@ if (signupForm) {
 // Logic for login.html (Final Corrected Version)
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
+// --- ADD THIS NEW BLOCK FOR THE EYE ICON ---
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            // Toggle the icon
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+
+
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;

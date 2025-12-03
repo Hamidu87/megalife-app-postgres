@@ -451,6 +451,25 @@ body {
 }
 
 
+/* --- Add these styles for the show/hide password feature --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.password-wrapper input {
+    padding-right: 40px; /* Add space on the right for the icon */
+}
+.password-wrapper .fa-eye,
+.password-wrapper .fa-eye-slash {
+    position: absolute;
+    right: 15px;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+
+
 /* 
 ============================================
     NEW STYLES FOR MESSAGE CONTAINER

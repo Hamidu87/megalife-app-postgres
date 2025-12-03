@@ -17,6 +17,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logic for signup.html (Final Corrected Version)
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
+    
+     // --- ADD THIS NEW BLOCK FOR THE SIGN UP EYE ICONS ---
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+
+    function createToggleListener(toggleElement, inputElement) {
+        if (toggleElement && inputElement) {
+            toggleElement.addEventListener('click', function () {
+                const type = inputElement.getAttribute('type') === 'password' ? 'text' : 'password';
+                inputElement.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+    }
+
+    createToggleListener(togglePassword, passwordInput);
+    createToggleListener(toggleConfirmPassword, confirmPasswordInput);
+
+
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         

@@ -7,6 +7,7 @@
     <!-- Make sure this CSS file exists and is styled correctly -->
     <link rel="stylesheet" href="Megalife.css"> 
      <link rel="icon" type="image/x-icon" href="/favicon.png.png?v=1.1">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -58,19 +59,24 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <!-- The id="password" was already correct -->
-                        <input type="password" id="password" placeholder="••••••••" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm-password">Confirm Password</label>
-                        <!-- The id="confirm-password" was already correct -->
-                        <input type="password" id="confirm-password" placeholder="••••••••" required>
-                    </div>
-                </div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <!-- Note the new ID: togglePassword -->
+            <i class="fas fa-eye password-toggle-icon" id="togglePassword"></i>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <div class="password-wrapper">
+            <input type="password" id="confirm-password" placeholder="••••••••" required>
+            <!-- Note the new ID: toggleConfirmPassword -->
+            <i class="fas fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
+        </div>
+    </div>
+</div>
 
                 <button type="submit" class="create-account-btn">Create Account</button>
             </form>

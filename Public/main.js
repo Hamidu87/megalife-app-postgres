@@ -76,19 +76,28 @@ if (signupForm) {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
 
-// --- LOGIC FOR SHOW/HIDE PASSWORD ICON ---
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
 
 if (togglePassword && passwordInput) {
     togglePassword.addEventListener('click', function () {
-        // Toggle the input's type attribute between 'password' and 'text'
+        // Toggle the input's type attribute
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
         
-        // Toggle the icon's class between 'fa-eye' and 'fa-eye-slash'
-        this.classList.toggle('fa-eye');
-        this.classList.toggle('fa-eye-slash');
+        // THIS IS THE CORRECTED LOGIC FOR THE ICON
+        // Check if the 'fa-eye-slash' class is currently on the icon
+        const isPasswordVisible = this.classList.contains('fa-eye-slash');
+
+        if (isPasswordVisible) {
+            // If the password IS visible, change the icon back to the open eye
+            this.classList.remove('fa-eye-slash');
+            this.classList.add('fa-eye');
+        } else {
+            // If the password is NOT visible, change the icon to the slashed eye
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
+        }
     });
 }
 

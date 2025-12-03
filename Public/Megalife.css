@@ -451,23 +451,30 @@ body {
 }
 
 
-/* --- Add these styles for the show/hide password feature --- */
+/* This container is the key to positioning the icon */
 .password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-.password-wrapper input {
-    padding-right: 40px; /* Add space on the right for the icon */
-}
-.password-wrapper .fa-eye,
-.password-wrapper .fa-eye-slash {
-    position: absolute;
-    right: 15px;
-    cursor: pointer;
-    color: var(--text-light);
+    position: relative; /* Establishes a positioning context for the icon */
 }
 
+/* Make sure the input doesn't overlap the icon */
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    /* Add padding on the right to make space for the icon */
+    padding-right: 45px; 
+}
+
+/* This is the icon itself */
+.password-toggle-icon {
+    /* Position the icon inside the wrapper */
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%); /* Perfectly center it vertically */
+    
+    cursor: pointer;
+    color: var(--text-light);
+    z-index: 2; /* Ensure it's on top of the input field */
+}
 
 
 /* 

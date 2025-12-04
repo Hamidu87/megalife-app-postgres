@@ -21,12 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
     const menuToggle = document.getElementById('admin-menu-toggle');
     const sidebarOverlay = document.getElementById('admin-sidebar-overlay');
-    
+
     // Elements for Bundle Modal
     const modal = document.getElementById('bundle-modal');
     const bundleForm = document.getElementById('bundle-form');
     const cancelBtn = document.getElementById('cancel-btn');
-    
 
     // Elements for User Modal
     const userModal = document.getElementById('user-modal');
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /*
     // Tab Switching Logic (CORRECTED for Sidebar Navigation)
     menuItems.forEach(menuLink => {
         menuLink.addEventListener('click', function (event) {
@@ -75,56 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
         });
     });
-
-*/
-
-
-
-
-
-
-
- // Tab Switching Logic (CORRECTED for Sidebar Navigation)
-    menuItems.forEach(menuLink => {
-        menuLink.addEventListener('click', function (event) {
-            event.preventDefault();
-            
-            // 1. Visually update the sidebar active state
-            menuItems.forEach(item => item.parentElement.classList.remove('active'));
-            this.parentElement.classList.add('active');
-
-            // 2. Show the correct content pane
-            contentPanes.forEach(pane => pane.classList.remove('active'));
-            const targetPane = document.getElementById(this.getAttribute('data-target'));
-            if (targetPane) targetPane.classList.add('active');
-            
-            // 3. Fetch data for the clicked tab
-            const targetId = this.getAttribute('data-target');
-            fetchDataForTab(targetId);
-
-            // 4. On mobile, close the sidebar after clicking a link
-            if (window.innerWidth <= 1024) {
-                document.body.classList.remove('admin-sidebar-open');
-            }
-        });
-    });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Modal Form Listeners
     if (cancelBtn) cancelBtn.addEventListener('click', closeBundleModal);
@@ -255,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    
+
     // NEW: Hamburger Menu Logic
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {

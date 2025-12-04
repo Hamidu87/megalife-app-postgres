@@ -860,99 +860,75 @@ body { font-family: var(--font-family); margin: 0; color: var(--text-dark); line
 
 
 
-/* --- Add this entire block to the bottom of your CSS file --- */
+/* --- Add these styles to the bottom of admin-style.css --- */
 
 /* 
 ============================================
-    FINAL RESPONSIVE FIX FOR ADMIN DASHBOARD
+    DEFINITIVE RESPONSIVE STYLES FOR ADMIN DASHBOARD
 ============================================
 */
 
-/* --- Base styles for mobile elements --- */
-/* (These won't affect your desktop view) */
-
-.main-header {
-    display: flex;
-    align-items: center;
-}
-
-.menu-toggle {
-    display: none; /* Hidden on large screens by default */
-    font-size: 24px;
+/* --- Hamburger Menu Icon --- */
+.main-header .menu-toggle {
+    display: none; /* Hidden on desktop */
+    font-size: 20px;
     cursor: pointer;
     margin-right: 15px;
-    color: #2D3748; /* A dark text color */
 }
 
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
+/* --- Table Scrolling --- */
+/* This is a wrapper for our tables to make them scrollable */
+.table-wrapper {
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
+    overflow-x: auto; /* This is the key: adds a horizontal scrollbar if needed */
 }
 
+/* --- Media Queries for Different Screen Sizes --- */
 
-/* --- Media Query for Tablets and Phones (992px and below) --- */
-@media (max-width: 992px) {
-    /* 1. Hide the sidebar off-screen */
+/* For Tablets and smaller (e.g., up to 1024px) */
+@media (max-width: 1024px) {
     .sidebar {
-        position: fixed; /* Change from absolute/static if needed */
-        left: -260px;
-        z-index: 1001;
-        height: 100vh;
+        position: fixed; /* Take it out of the normal flow */
+        left: -260px; /* Hide it off-screen to the left */
+        z-index: 1000;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
         transition: left 0.3s ease-in-out;
-        box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
 
-    /* 2. Make the main content take the full width */
+    /* This class will be added by JavaScript to show the sidebar */
+    body.admin-sidebar-open .sidebar {
+        left: 0; /* Slide it into view */
+    }
+
     .main-content {
-        margin-left: 0;
+        margin-left: 0; /* The main content now takes up the full width */
+        width: 100%;
     }
 
-    /* 3. Show the hamburger menu icon */
-    .menu-toggle {
-        display: block;
+    .main-header .menu-toggle {
+        display: block; /* Show the hamburger icon */
     }
     
-    /* 4. These styles apply ONLY when the body has the 'admin-sidebar-open' class */
-    body.admin-sidebar-open .sidebar {
-        left: 0; /* Slide the sidebar into view */
-    }
-    body.admin-sidebar-open .sidebar-overlay {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    /* 5. Make multi-column layouts stack into a single column */
-    .analytics-grid,
+    /* Make grids stack earlier on tablets */
+    .data-bundles-grid,
     .support-grid,
-    .api-docs-grid,
-    .data-bundles-grid {
+    .api-docs-grid {
         grid-template-columns: 1fr;
     }
 }
 
-/* --- Media Query for smaller devices to handle wide tables --- */
+/* For Mobile phones (e.g., up to 768px) */
 @media (max-width: 768px) {
     .main-content {
         padding: 15px; /* Reduce padding on small screens */
     }
 
-    /* Make tables horizontally scrollable */
-    .user-table,
-    .transactions-table {
-        display: block;
-        width: 100%;
-        overflow-x: auto;
+    .analytics-grid {
+        grid-template-columns: 1fr; /* Stack analytics cards */
     }
-    .user-table .table-header, .user-table .table-row,
-    .transactions-table .table-header, .transactions-table .table-row {
-        min-width: 900px; /* Force a scrollbar if the screen is too narrow */
+
+    /* We need to give our tables a minimum width to force the scrollbar */
+    .user-table, .transactions-table {
+        min-width: 800px; 
     }
 }

@@ -21,11 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentPanes = document.querySelectorAll('.tab-content-wrapper .tab-pane');
     const menuToggle = document.getElementById('admin-menu-toggle');
     const sidebarOverlay = document.getElementById('admin-sidebar-overlay');
+    const tabs = document.querySelectorAll('.sidebar-menu .menu-item a'); 
 
     // Elements for Bundle Modal
     const modal = document.getElementById('bundle-modal');
     const bundleForm = document.getElementById('bundle-form');
     const cancelBtn = document.getElementById('cancel-btn');
+    
 
     // Elements for User Modal
     const userModal = document.getElementById('user-modal');
@@ -203,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-// NEW: Hamburger Menu Logic
+    
     // NEW: Hamburger Menu Logic
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {

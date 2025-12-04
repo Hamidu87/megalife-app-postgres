@@ -213,12 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.toggle('admin-sidebar-open');
         });
     }
-    if (sidebarOverlay) {
-        // Clicking the dark overlay will also close the sidebar
-        sidebarOverlay.addEventListener('click', () => {
-            document.body.classList.remove('admin-sidebar-open');
-        });
-    }
+   
 
 
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---

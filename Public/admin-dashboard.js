@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /*
     // Tab Switching Logic (CORRECTED for Sidebar Navigation)
     menuItems.forEach(menuLink => {
         menuLink.addEventListener('click', function (event) {
@@ -74,6 +75,56 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
         });
     });
+
+*/
+
+
+
+
+
+
+
+ // Tab Switching Logic (CORRECTED for Sidebar Navigation)
+    menuItems.forEach(menuLink => {
+        menuLink.addEventListener('click', function (event) {
+            event.preventDefault();
+            
+            // 1. Visually update the sidebar active state
+            menuItems.forEach(item => item.parentElement.classList.remove('active'));
+            this.parentElement.classList.add('active');
+
+            // 2. Show the correct content pane
+            contentPanes.forEach(pane => pane.classList.remove('active'));
+            const targetPane = document.getElementById(this.getAttribute('data-target'));
+            if (targetPane) targetPane.classList.add('active');
+            
+            // 3. Fetch data for the clicked tab
+            const targetId = this.getAttribute('data-target');
+            fetchDataForTab(targetId);
+
+            // 4. On mobile, close the sidebar after clicking a link
+            if (window.innerWidth <= 1024) {
+                document.body.classList.remove('admin-sidebar-open');
+            }
+        });
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Modal Form Listeners
     if (cancelBtn) cancelBtn.addEventListener('click', closeBundleModal);

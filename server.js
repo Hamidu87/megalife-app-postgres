@@ -4,11 +4,11 @@ require('dotenv').config();
 const express = require('express');
 const { forwardTransaction } = require('./apiForwarder');
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs' );
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const sgMail = require('@sendgrid/mail');
+const Brevo = require('@getbrevo/brevo');
 const path = require('path');
 const multer = require('multer'); 
 const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY);
@@ -16,7 +16,9 @@ const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY);
 // --- 2. INITIALIZE APP & SET API KEYS ---
 const app = express();
 const PORT = 3000;
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.apiClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
 
 // --- 3. MIDDLEWARE ---
 app.use(cors());
@@ -118,6 +120,7 @@ app.get('/api/status', (req, res) => {
 // --- PUBLIC AUTHENTICATION ROUTES ---
 // User Registration Route (with Verification)
 
+/*  
 app.post('/register', async (req, res) => {
     try {
         const { fullName, email, password, telephone, country } = req.body;
@@ -166,6 +169,74 @@ res.status(201).json({ message: 'Registration successful! Please check your emai
         res.status(500).json({ message: 'Server error.' });
     }
 });
+*/
+
+
+
+
+
+
+
+app.post('/register', async (req, res) => {
+    try {
+        const { fullName, email, password, telephone, country } = req.body;
+        if (!fullName || !email || !password) return res.status(400).json({ message: 'All fields are required.' });
+
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (result.rows.length > 0) return res.status(409).json({ message: 'An account with this email already exists.' });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        await db.query(
+            'INSERT INTO users ("fullName", email, password, telephone, country, "isVerified", "verificationToken") VALUES ($1, $2, $3, $4, $5, false, $6)',
+            [fullName, email, hashedPassword, telephone, country, verificationToken]
+        );
+        
+        const verificationUrl = `https://www.megalifeconsult.com/verify-email.html?token=${verificationToken}`;
+        
+        // --- BREVO EMAIL LOGIC ---
+        let sendSmtpEmail = new Brevo.SendSmtpEmail(); 
+        sendSmtpEmail.subject = "Verify Your Email Address for Megalife Consult";
+        sendSmtpEmail.htmlContent = `
+            <div style="font-family: sans-serif; text-align: center; padding: 20px; line-height: 1.6;">
+                <h1 style="color: #212529;">Welcome to Megalife Consult!</h1>
+                <p>Thank you for registering. Please click the button below to verify your email address and activate your account:</p>
+                <p style="margin: 25px 0;">
+                    <a href="${verificationUrl}" target="_blank" style="background-color: #F57C00; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">Verify My Email</a>
+                </p>
+                <p>If you did not create an account, please ignore this email.</p>
+            </div>
+        `;
+        sendSmtpEmail.sender = { "name": "Megalife Consult", "email": "support@megalifeconsult.com" };
+        sendSmtpEmail.to = [{ "email": email }];
+
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log(`Verification email sent to ${email} via Brevo.`);
+        // --- END OF BREVO LOGIC ---
+
+        res.status(201).json({ message: 'Registration successful! Please check your email to verify your account.' });
+
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // NEW: Email Verification Route
 // Email Verification Route (Final PostgreSQL Version)
@@ -275,6 +346,9 @@ app.post('/login', async (req, res) => {
 });
 // FORGOT PASSWORD ROUTE
 // Forgot Password Route (with improved error logging)
+
+/*
+
 app.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
@@ -332,6 +406,69 @@ app.post('/forgot-password', async (req, res) => {
         res.status(500).json({ message: 'An internal server error occurred.' });
     }
 });
+
+*/
+
+
+
+
+app.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        console.log(`\n[FORGOT PASSWORD] Step 1: Request received for ${email}.`);
+
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const users = result.rows;
+        
+        if (users.length > 0) {
+            const user = users[0];
+            console.log(`[FORGOT PASSWORD] Step 2: User ID ${user.id} found.`);
+
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            const tokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+            console.log('[FORGOT PASSWORD] Step 3: Reset token generated.');
+
+            await db.query('UPDATE users SET "resetToken" = $1, "resetTokenExpiry" = $2 WHERE id = $3', [hashedToken, tokenExpiry, user.id]);
+            console.log('[FORGOT PASSWORD] Step 4: Token successfully saved to database.');
+
+            const resetUrl = `https://www.megalifeconsult.com/reset-password.html?token=${resetToken}`;
+            
+            // --- BREVO EMAIL LOGIC ---
+            console.log('[FORGOT PASSWORD] Step 5: Attempting to send email via Brevo...');
+            let sendSmtpEmail = new Brevo.SendSmtpEmail();
+            sendSmtpEmail.subject = "Your Password Reset Request";
+            sendSmtpEmail.htmlContent = `
+                <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+                    <h2>Password Reset Request</h2>
+                    <p>You are receiving this email because a request was made to reset the password for your account.</p>
+                    <p>Please click the button below to reset your password. This link is valid for 15 minutes.</p>
+                    <a href="${resetUrl}" style="background-color: #F57C00; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">Reset My Password</a>
+                    <p style="margin-top: 20px;">If you did not request a password reset, please ignore this email.</p>
+                </div>
+            `;
+            sendSmtpEmail.sender = { "name": "Megalife Consult", "email": "support@megalifeconsult.com" };
+            sendSmtpEmail.to = [{ "email": user.email }];
+
+            await apiInstance.sendTransacEmail(sendSmtpEmail);
+            console.log(`[FORGOT PASSWORD] ✅ SUCCESS: Email sent to ${user.email} via Brevo.`);
+            // --- END OF BREVO LOGIC ---
+        } else {
+            console.log(`[FORGOT PASSWORD] Step 2: User with email ${email} not found. Sending generic response.`);
+        }
+        
+        res.status(200).json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+
+    } catch (error) {
+        console.error('--- ❌ FATAL ERROR in /forgot-password route ---');
+        console.error('The request failed. The specific error is:', error);
+        res.status(500).json({ message: 'An internal server error occurred.' });
+    }
+});
+
+
+
+
 
 // Reset Password Route (Final PostgreSQL Version)
 app.post('/reset-password', async (req, res) => {

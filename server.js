@@ -819,13 +819,30 @@ app.post('/admin/settings', authenticateAdmin, async (req, res) => {
         res.status(200).json({ message: 'Settings saved.' });
     } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
+// SEND a test email (Corrected for Brevo)
 app.post('/admin/send-test-email', authenticateAdmin, async (req, res) => {
     try {
         const { recipientEmail } = req.body;
-        const msg = { to: recipientEmail, from: 'abdulhamidu51@gmail.com', subject: 'Test', html: '<h1>Success!</h1>' };
-        await sgMail.send(msg);
-        res.status(200).json({ message: `Test email sent.` });
-    } catch (error) { res.status(500).json({ message: 'Failed to send.' }); }
+        if (!recipientEmail) {
+            return res.status(400).json({ message: 'Recipient email is required.' });
+        }
+        
+        // Use the new Brevo SDK
+        let sendSmtpEmail = new Brevo.SendSmtpEmail(); 
+        sendSmtpEmail.subject = "Megalife Email Configuration Test";
+        sendSmtpEmail.htmlContent = "<h1>Success!</h1><p>Your Brevo email configuration is working correctly.</p>";
+        sendSmtpEmail.sender = { "name": "Megalife Consult", "email": "support@megalifeconsult.com" };
+        sendSmtpEmail.to = [{ "email": recipientEmail }];
+
+        // Use the 'apiInstance' we defined at the top of the file to send the email
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
+
+        res.status(200).json({ message: `Test email successfully sent to ${recipientEmail}` });
+
+    } catch (error) {
+        console.error('Error sending test email:', error.message);
+        res.status(500).json({ message: 'Failed to send test email. Check server logs.' });
+    }
 });
 
 

@@ -17,8 +17,20 @@ const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY);
 const app = express();
 const PORT = 3000;
 
+
+
+const apiInstance = new Brevo.TransactionalEmailsApi();
+const brevoApiKey = process.env.BREVO_API_KEY;
+if (brevoApiKey) {
+    // THIS IS THE FIX: .trim() removes any leading/trailing whitespace or newlines
+    apiInstance.apiClient.authentications['api-key'].apiKey = brevoApiKey.trim();
+} else {
+    console.error('CRITICAL: BREVO_API_KEY is not defined in environment variables!');
+}
+/*<--
 const apiInstance = new Brevo.TransactionalEmailsApi();
 apiInstance.apiClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
+-->*/
 
 // --- 3. MIDDLEWARE ---
 app.use(cors());

@@ -363,22 +363,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- DYNAMICALLY POPULATE BUNDLE OPTIONS ---
+    // --- DYNAMICALLY POPULATE BUNDLE OPTIONS (CORRECTED) ---
     async function populateBundles() {
         try {
-            const response = await fetch('https://megalife-app-postgres.onrender.com/bundles');
+            // THIS IS THE KEY CHANGE: We now use the authenticated /bundles route
+            // which will return different prices based on the user's role.
+            const response = await fetch('https://megalife-app-postgres.onrender.com/bundles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
             if (!response.ok) throw new Error('Could not load bundles.');
             const allBundles = await response.json();
             const providerBundles = allBundles.filter(bundle => bundle.provider === provider);
 
-            bundleSelect.innerHTML = '<option value="" data-price="0">  Select a Bundle  </option>';
+            bundleSelect.innerHTML = '<option value="" data-price="0">-- Select a Bundle --</option>';
 
             providerBundles.forEach(bundle => {
-                if (bundle.volume && bundle.price) {
+                // Use the correct 'selling_price' column from the database
+                if (bundle.volume && bundle.selling_price) {
                     const option = document.createElement('option');
                     option.value = bundle.volume;
-                    option.setAttribute('data-price', bundle.price);
-                    option.textContent = `${bundle.volume} - GHS ${parseFloat(bundle.price).toFixed(2)}`;
+                    // Set the data-price to the 'selling_price'
+                    option.setAttribute('data-price', bundle.selling_price);
+                    // Display the 'selling_price' to the user
+                    option.textContent = `${bundle.volume} - GHS ${parseFloat(bundle.selling_price).toFixed(2)}`;
                     bundleSelect.appendChild(option);
                 }
             });

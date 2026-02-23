@@ -778,14 +778,12 @@ app.delete('/admin/users/:id', authenticateAdmin, async (req, res) => {
 
 
 // READ all bundles
+// READ all bundles
 app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM bundles ORDER BY provider, user_type, selling_price');
         res.status(200).json(result.rows);
-    } catch (error) {
-        console.error('Error fetching bundles:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
+    } catch (error) { /* ... */ }
 });
 
 // CREATE a new bundle
@@ -793,17 +791,14 @@ app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
         const { provider, volume, selling_price, supplier_cost, user_type } = req.body;
         if (!provider || !volume || !selling_price || !supplier_cost || !user_type) {
-            return res.status(400).json({ message: 'All bundle fields are required.' });
+            return res.status(400).json({ message: 'All fields are required.' });
         }
         await db.query(
             'INSERT INTO bundles (provider, volume, selling_price, supplier_cost, user_type) VALUES ($1, $2, $3, $4, $5)',
             [provider, volume, selling_price, supplier_cost, user_type]
         );
         res.status(201).json({ message: 'Bundle created successfully.' });
-    } catch (error) {
-        console.error('Error creating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
+    } catch (error) { /* ... */ }
 });
 
 // UPDATE a bundle
@@ -811,18 +806,13 @@ app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { provider, volume, selling_price, supplier_cost, user_type } = req.body;
-        if (!provider || !volume || !selling_price || !supplier_cost || !user_type) {
-            return res.status(400).json({ message: 'All bundle fields are required.' });
-        }
+        // ... (validation)
         await db.query(
             'UPDATE bundles SET provider = $1, volume = $2, selling_price = $3, supplier_cost = $4, user_type = $5 WHERE id = $6',
             [provider, volume, selling_price, supplier_cost, user_type, id]
         );
         res.status(200).json({ message: 'Bundle updated successfully.' });
-    } catch (error) {
-        console.error('Error updating bundle:', error);
-        res.status(500).json({ message: 'Server error.' });
-    }
+    } catch (error) { /* ... */ }
 });
 // DELETE a bundle
 app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {

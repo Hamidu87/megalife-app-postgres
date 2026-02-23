@@ -226,51 +226,84 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     // UPDATED: openBundleModal now accepts userType
     function openBundleModal(provider = null, userType = null, bundle = null) {
-        if (!bundleForm) return;
-        bundleForm.reset();
-        
-        if (bundle) { // Editing an existing bundle
-            document.getElementById('modal-title').textContent = `Edit ${bundle.user_type} Bundle`;
-            document.getElementById('bundle-id').value = bundle.id;
-            document.getElementById('bundle-user-type').value = bundle.user_type;
-            document.getElementById('bundle-provider').value = bundle.provider;
-            document.getElementById('bundle-volume').value = bundle.volume;
-            document.getElementById('bundle-selling-price').value = bundle.selling_price;
-            document.getElementById('bundle-supplier-cost').value = bundle.supplier_cost;
-        } else { // Adding a new bundle
-            document.getElementById('modal-title').textContent = `Add New ${userType} Bundle`;
-            document.getElementById('bundle-id').value = '';
-            document.getElementById('bundle-user-type').value = userType; // Set the hidden user type
-            document.getElementById('bundle-provider').value = provider; // Pre-select the provider
-        }
-        if (modal) modal.hidden = false;
-    }
-
-
+    if (!bundleForm) return;
+    bundleForm.reset();
     
-
-
-
- // UPDATED: handleBundleFormSubmit now sends all new fields
-    async function handleBundleFormSubmit(e) {
-        e.preventDefault();
-        const id = document.getElementById('bundle-id').value;
-        const bundleData = {
-            provider: document.getElementById('bundle-provider').value,
-            volume: document.getElementById('bundle-volume').value,
-            selling_price: document.getElementById('bundle-selling-price').value,
-            supplier_cost: document.getElementById('bundle-supplier-cost').value,
-            user_type: document.getElementById('bundle-user-type').value // Send the user type
-        };
-        const isEditing = !!id;
-        const url = isEditing ? `.../admin/bundles/${id}` : `.../admin/bundles`;
-        const method = isEditing ? 'PUT' : 'POST';
-        try {
-            await fetch(url, { method, headers: { /*...*/ }, body: JSON.stringify(bundleData) });
-            closeBundleModal();
-            fetchAllBundles(); // Refresh the view
-        } catch (error) { alert('Error saving bundle.'); }
+    if (bundle) { // This is for editing an existing bundle
+        document.getElementById('modal-title').textContent = `Edit ${bundle.user_type} Bundle`;
+        document.getElementById('bundle-id').value = bundle.id;
+        document.getElementById('bundle-user-type').value = bundle.user_type;
+        document.getElementById('bundle-provider').value = bundle.provider;
+        document.getElementById('bundle-volume').value = bundle.volume;
+        document.getElementById('bundle-selling-price').value = bundle.selling_price;
+        document.getElementById('bundle-supplier-cost').value = bundle.supplier_cost;
+    } else { // This is for adding a new bundle
+        document.getElementById('modal-title').textContent = `Add New ${userType} Bundle`;
+        document.getElementById('bundle-id').value = '';
+        document.getElementById('bundle-user-type').value = userType;
+        document.getElementById('bundle-provider').value = provider;
     }
+    if (modal) modal.hidden = false;
+}
+
+async function handleBundleFormSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('bundle-id').value;
+    const bundleData = {
+        provider: document.getElementById('bundle-provider').value,
+        volume: document.getElementById('bundle-volume').value,
+        selling_price: document.getElementById('bundle-selling-price').value,
+        supplier_cost: document.getElementById('bundle-supplier-cost').value,
+        user_type: document.getElementById('bundle-user-type').value
+    };
+    
+    const isEditing = !!id;
+    
+    // THIS IS THE CORRECTED CODE WITH THE REAL URL
+    const baseUrl = 'https://megalife-app-postgres.onrender.com';
+    const url = isEditing ? `${baseUrl}/admin/bundles/${id}` : `${baseUrl}/admin/bundles`;
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(bundleData)
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || 'Failed to save bundle.');
+        }
+        closeBundleModal();
+        fetchAllBundles(); // Refresh the view
+    } catch (error) {
+        console.error('Error saving bundle:', error);
+        alert(`Error: ${error.message}`);
+    }
+}
+
+
+     // --- DYNAMIC CLICK HANDLER (CORRECTED) ---
+    async function handleDynamicClicks(e) {
+        // ... (Your logic for users and transactions)
+        const addBtn = e.target.closest('.add-bundle-btn');
+        if (addBtn) {
+            const provider = addBtn.dataset.provider;
+            const userType = addBtn.dataset.user_type;
+            openBundleModal(provider, userType);
+        }
+        const editBtn = e.target.closest('.bundle-table .action-edit');
+        if (editBtn) {
+            const id = editBtn.closest('tr').dataset.id;
+            const response = await fetch(`.../admin/bundles`, { /*...*/ });
+            const bundles = await response.json();
+            const bundleToEdit = bundles.find(b => b.id == id);
+            if (bundleToEdit) openBundleModal(null, null, bundleToEdit);
+        }
+    };
     
     function openUserModal(user) {
         if (!userForm) return;

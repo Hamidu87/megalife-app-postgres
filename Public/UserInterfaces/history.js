@@ -199,6 +199,41 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '../login.html';
         return;
     }
+ // --- 1. NEW: EVENT LISTENER FOR DYNAMIC CANCEL BUTTONS ---
+    document.addEventListener('click', async (e) => {
+        // Check if a 'cancel-btn' was clicked
+        if (e.target.classList.contains('cancel-btn')) {
+            e.preventDefault();
+            const transactionId = e.target.dataset.id;
+            
+            if (confirm('Are you sure you want to cancel this order? The amount will be refunded to your wallet.')) {
+                try {
+                    e.target.disabled = true; // Disable button immediately
+                    e.target.textContent = 'Cancelling...';
+
+                    const response = await fetch(`https://megalife-app-postgres.onrender.com/user/transactions/${transactionId}/cancel`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    
+                    if (response.ok) {
+                        // Refresh the list to show the new 'Cancelled' status
+                        // We check which page we are on and refresh the correct list
+                        if (document.getElementById('bundle-orders-table')) fetchBundleOrders();
+                        if (document.getElementById('all-orders-list')) fetchAllOrders();
+                    }
+                } catch (error) {
+                    console.error('Cancellation failed:', error);
+                    alert('An error occurred. Please try again.');
+                    e.target.disabled = false; // Re-enable button on failure
+                    e.target.textContent = 'Cancel';
+                }
+            }
+        }
+    });
 
     // --- 2. PAGINATION STATE & ELEMENTS (NEW) ---
     let currentPage = 1;
@@ -209,14 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. DATA FETCHING & DISPLAY FUNCTIONS ---
 
-    // Function to fetch and build the BUNDLE ORDERS table (CORRECTED for Pagination)
+    // --- 3. DATA FETCHING & DISPLAY FUNCTIONS ---
+
+    // Function to fetch and build the BUNDLE ORDERS table (UPDATED)
     async function fetchBundleOrders(page = 1) {
         const tableContainer = document.getElementById('bundle-orders-table');
         if (!tableContainer) return;
 
-        tableContainer.innerHTML = '<div class="empty-state">Loading your bundle orders...</div>';
+        tableContainer.innerHTML = '<div class="empty-state">Loading...</div>';
         try {
-            // Fetch the specific page from the backend
             const response = await fetch(`https://megalife-app-postgres.onrender.com/user/transactions/bundles?page=${page}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -228,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let tableHTML = `
                 <div class="table-header">
-                    <span>Order ID</span><span>Recipient</span><span>Status</span><span>Volume</span><span>Amount(GHS)</span><span>Network</span><span>Date & Time</span><span>Notice</span>
+                    <span>Order ID</span><span>Recipient</span><span>Status</span><span>Volume</span><span>Amount(GHS)</span><span>Network</span><span>Date & Time</span><span>Notice/Action</span>
                 </div>`;
             
             if (data.transactions.length > 0) {
@@ -236,19 +272,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dateObj = new Date(tx.transactionsDate);
                     const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
                     const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    let statusBadgeClass = tx.status.toLowerCase() === 'completed' ? 'status-delivered' : 'status-pending';
-                    let noticeText = tx.status.toLowerCase() === 'completed' ? 'Order delivered successfully' : 'Your order is currently being processed';
+
+                    let status = tx.status.toLowerCase();
+                    let statusBadgeClass = 'status-pending';
+                    let noticeCell = 'Your order is currently being processed';
+
+                    if (status === 'completed') {
+                        statusBadgeClass = 'status-delivered';
+                        noticeCell = 'Order delivered successfully';
+                    } else if (status === 'failed') {
+                        statusBadgeClass = 'status-failed';
+                        noticeCell = 'Order failed. Please contact support.';
+                    } else if (status === 'cancelled') {
+                        statusBadgeClass = 'status-cancelled'; // You'll need to add CSS for this
+                        noticeCell = 'This order has been cancelled.';
+                    }
+                    
+                    // THIS IS THE CRITICAL CHANGE:
+                    // If the order is 'Processing', the noticeCell becomes a Cancel button
+                    if (status === 'processing') {
+                        noticeCell = `<button class="cancel-btn" data-id="${tx.id}">Cancel</button>`;
+                    }
                     
                     tableHTML += `
                         <div class="table-row">
                             <span><a href="#" class="order-id-link">#${tx.orderId || tx.id}</a></span>
                             <span>${tx.recipient || 'N/A'}</span>
-                            <span><span class="status-badge ${statusBadgeClass}"><i class="fas fa-check"></i> ${tx.status}</span></span>
+                            <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
                             <span class="volume"><a href="#">${tx.details}</a></span>
                             <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
                             <span>${tx.type}</span>
                             <span class="date-time">${formattedDate}<br>${formattedTime}</span>
-                            <span>${noticeText}</span>
+                            <td>${noticeCell}</td>
                         </div>
                     `;
                 });
@@ -256,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHTML += `<div class="empty-state">No bundle orders found.</div>`;
             }
             tableContainer.innerHTML = tableHTML;
-            updatePaginationControls(); // Update the buttons and page info
+            updatePaginationControls();
         } catch (error) {
             console.error("Failed to fetch bundle orders:", error);
             tableContainer.innerHTML = `<div class="empty-state">Error loading orders.</div>`;

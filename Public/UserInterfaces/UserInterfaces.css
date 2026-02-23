@@ -1911,4 +1911,13 @@ body {
     border-color: var(--text-dark);
 }
 
-
+.cancel-btn {
+    background-color: #e53935; /* Red */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}

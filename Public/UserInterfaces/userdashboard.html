@@ -57,20 +57,23 @@
             </section>
 
             <!-- Team & Referral Section -->
-            <section class="team-section">
-                <h3>My Team</h3>
-                <div class="team-grid">
-                    <div class="card">
-                        <p class="card-title">Referral Bonus/Commission</p>
-                        <h2 class="card-value">GH₵ 0.00</h2>
-                        <p class="card-subtitle">Last updated: Never</p>
-                    </div>
-                    <div class="card">
-                        <p class="card-title">Total Referees</p>
-                        <h2 class="card-value">0</h2>
-                    </div>
-                </div>
-            </section>
+          <section class="team-section">
+    <h3>My Team</h3>
+    <div class="team-grid">
+        <div class="card">
+            <p class="card-title">Referral Bonus/Commission</p>
+            <!-- Add an ID to the h2 tag -->
+            <h2 class="card-value" id="commission-balance">GH₵ 0.00</h2>
+            <p class="card-subtitle">Last updated: Never</p>
+            <!-- ADD THE WITHDRAW BUTTON HERE -->
+            <button class="withdraw-btn" id="withdraw-commission-btn">Withdraw to Wallet</button>
+        </div>
+        <div class="card">
+            <p class="card-title">Total Referees</p>
+            <h2 class="card-value" id="total-referees">0</h2>
+        </div>
+    </div>
+</section>
 <!-- Filter Bar -->
             <div class="filter-bar">
                 <label for="filter">Filter by:</label>
@@ -80,13 +83,14 @@
                     <option value="last-month">Last 30 Days</option>
                 </select>
             </div>
-            <section class="referral-section">
-                <h3>Your Referral Link</h3>
-                <div class="input-group">
-                    <input type="text" placeholder="https://www.megalifeconsult.com/login.html" readonly>
-                    <button>Copy</button>
-                </div>
-            </section>
+           <section class="referral-section">
+    <h3>Your Referral Link</h3>
+    <div class="input-group">
+        <!-- ADD THE ID HERE -->
+        <input type="text" id="referral-link-input" value="Loading your link..." readonly>
+        <button id="copy-referral-btn">Copy</button>
+    </div>
+</section>
         </main>
     </div>
 

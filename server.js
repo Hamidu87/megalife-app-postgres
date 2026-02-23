@@ -132,27 +132,56 @@ app.get('/api/status', (req, res) => {
 // --- PUBLIC AUTHENTICATION ROUTES ---
 // User Registration Route (with Verification)
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'Public', 'index.html')));
+/*  
 app.post('/register', async (req, res) => {
     try {
-        const { fullName, email, password, telephone, country, referralCode } = req.body;
-        let referrerId = null;
-        if (referralCode) { /* ... check for referrer ... */ }
+        const { fullName, email, password, telephone, country } = req.body;
+        if (!fullName || !email || !password) return res.status(400).json({ message: 'All fields are required.' });
+
         const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        if (result.rows.length > 0) return res.status(409).json({ message: 'Email already exists.' });
+        const users = result.rows
+        if (users.length > 0) return res.status(409).json({ message: 'An account with this email already exists.' });
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const newReferralCode = crypto.randomBytes(4).toString('hex');
-        await db.query(
-            'INSERT INTO users ("fullName", email, password, telephone, country, "isVerified", "verificationToken", "referrerId", "referralCode") VALUES ($1, $2, $3, $4, $5, false, $6, $7, $8)',
-            [fullName, email, hashedPassword, telephone, country, verificationToken, referrerId, newReferralCode]
+
+         await db.query(
+            'INSERT INTO users ("fullName", email, password, telephone, country, "isVerified", "verificationToken") VALUES ($1, $2, $3, $4, $5, false, $6)',
+            [fullName, email, hashedPassword, telephone, country, verificationToken]
         );
+        
+        // --- THIS IS THE CRITICAL FIX ---
+        // 1. THE CORRECT URL for the verification link
         const verificationUrl = `https://www.megalifeconsult.com/verify-email.html?token=${verificationToken}`;
-        let emailToSend = new Brevo.SendSmtpEmail(); /* ... create and send email ... */
-        await apiInstance.sendTransacEmail(emailToSend);
-        res.status(201).json({ message: 'Registration successful! Please check your email.' });
-    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
+        // 2. THE CORRECT HTML to make the link a styled button
+        const msg = {
+            to: email,
+            from: 'support@megalifeconsult.com', // Your verified sender
+            subject: 'Verify Your Email Address for Megalife Consult',
+            html: `
+                <div style="font-family: sans-serif; text-align: center; padding: 20px; line-height: 1.6;">
+                    <h1 style="color: #212529;">Welcome to Megalife Consult!</h1>
+                    <p>Thank you for registering. Please click the button below to verify your email address and activate your account:</p>
+                    <p style="margin: 25px 0;">
+                        <a href="${verificationUrl}" target="_blank" style="background-color: #F57C00; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">Verify My Email</a>
+                    </p>
+                    <p>If you did not create an account, please ignore this email.</p>
+                </div>
+            `,
+        };
+        
+        await sgMail.send(msg);
+console.log(`Verification email sent to ${email}`);
+
+// THIS IS THE NEW, CORRECT MESSAGE
+res.status(201).json({ message: 'Registration successful! Please check your email to verify your account.' });
+
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
 });
+*/
 
 
 
@@ -177,69 +206,6 @@ app.post('/register', async (req, res) => {
         );
         
         const verificationUrl = `https://www.megalifeconsult.com/verify-email.html?token=${verificationToken}`;
-
-// UPGRADE TO AGENT (with Referral Commission Logic)
-app.post('/user/upgrade-to-agent', authenticateToken, async (req, res) => {
-    let client;
-    try {
-        client = await db.connect();
-        await client.query('BEGIN'); // Start a secure transaction
-
-        const userId = req.user.userId;
-
-        // 1. Get the user's details, including their referrer's ID
-        const userResult = await client.query(
-            'SELECT role, "walletBalance", "referrerId" FROM users WHERE id = $1 FOR UPDATE', 
-            [userId]
-        );
-        if (userResult.rows.length === 0) throw new Error('User not found.');
-        
-        const user = userResult.rows[0];
-        if (user.role === 'Agent') throw new Error('You are already an Agent.');
-
-        // 2. Get the upgrade fee from settings
-        const feeResult = await client.query("SELECT setting_value FROM settings WHERE setting_name = 'agent_upgrade_fee'");
-        if (feeResult.rows.length === 0) throw new Error('Agent upgrade fee not set by admin.');
-        const upgradeFee = parseFloat(feeResult.rows[0].setting_value);
-        
-        if (parseFloat(user.walletBalance) < upgradeFee) throw new Error('Insufficient wallet balance to upgrade.');
-
-        // 3. Deduct fee and upgrade the current user's role
-        await client.query('UPDATE users SET "walletBalance" = "walletBalance" - $1, role = $2 WHERE id = $3', [upgradeFee, 'Agent', userId]);
-
-        // --- THIS IS THE CRITICAL NEW LOGIC ---
-        // 4. Check if this user was referred by someone
-        if (user.referrerId) {
-            // Calculate the 70% commission
-            const referralBonus = upgradeFee * 0.70;
-            
-            // Add the bonus to the referrer's referralBalance
-            await client.query(
-                'UPDATE users SET "referralBalance" = "referralBalance" + $1 WHERE id = $2',
-                [referralBonus, user.referrerId]
-            );
-            
-            console.log(`✅ Awarded referral bonus of ${referralBonus} to referrer ID ${user.referrerId} for user ${userId}'s upgrade.`);
-        }
-        // --- END OF NEW LOGIC ---
-        
-        // 5. If everything succeeds, commit all database changes
-        await client.query('COMMIT');
-        
-        res.status(200).json({ message: 'Congratulations! You have been successfully upgraded to an Agent.' });
-
-    } catch (error) {
-        if (client) { await client.query('ROLLBACK'); }
-        console.error('Error during agent upgrade:', error);
-        res.status(500).json({ message: error.message || 'An error occurred during the upgrade.' });
-    } finally {
-        if (client) { client.release(); }
-    }
-});
-
-
-
-
         
         // --- BREVO EMAIL LOGIC ---
         let sendSmtpEmail = new Brevo.SendSmtpEmail(); 
@@ -278,6 +244,13 @@ app.post('/user/upgrade-to-agent', authenticateToken, async (req, res) => {
 
 
 
+
+
+
+
+
+
+// NEW: Email Verification Route
 // Email Verification Route (Final PostgreSQL Version)
 app.post('/verify-email', async (req, res) => {
     try {
@@ -314,8 +287,8 @@ app.post('/verify-email', async (req, res) => {
 });
 
 // GET ALL ACTIVE BUNDLES (for user purchase pages)
-
-
+// This is the final, correct version for PostgreSQL
+// GET ALL ACTIVE BUNDLES (Final PostgreSQL Version)
 app.get('/bundles', async (req, res) => {
     try {
         // CORRECTED QUERY: Uses PostgreSQL syntax and double quotes
@@ -384,6 +357,8 @@ app.post('/login', async (req, res) => {
     }
 });
 // FORGOT PASSWORD ROUTE
+// Forgot Password Route (with improved error logging)
+
 /*
 
 app.post('/forgot-password', async (req, res) => {
@@ -778,42 +753,43 @@ app.delete('/admin/users/:id', authenticateAdmin, async (req, res) => {
 
 
 // READ all bundles
-// READ all bundles
 app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM bundles ORDER BY provider, user_type, selling_price');
+        const result = await db.query('SELECT * FROM bundles ORDER BY provider, price');
         res.status(200).json(result.rows);
-    } catch (error) { /* ... */ }
+    } catch (error) {
+        console.error('Error fetching bundles:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
 });
 
 // CREATE a new bundle
 app.post('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {
-        const { provider, volume, selling_price, supplier_cost, user_type } = req.body;
-        if (!provider || !volume || !selling_price || !supplier_cost || !user_type) {
-            return res.status(400).json({ message: 'All fields are required.' });
-        }
-        await db.query(
-            'INSERT INTO bundles (provider, volume, selling_price, supplier_cost, user_type) VALUES ($1, $2, $3, $4, $5)',
-            [provider, volume, selling_price, supplier_cost, user_type]
-        );
+       const { provider, volume, price, supplierPrice } = req.body; // Add supplierPrice here
+// ...
+await db.query(
+    'INSERT INTO bundles (provider, volume, price, "supplierPrice") VALUES ($1, $2, $3, $4)',
+    [provider, volume, price, supplierPrice]
+);
         res.status(201).json({ message: 'Bundle created successfully.' });
-    } catch (error) { /* ... */ }
+    } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });
 
 // UPDATE a bundle
 app.put('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { provider, volume, selling_price, supplier_cost, user_type } = req.body;
-        // ... (validation)
-        await db.query(
-            'UPDATE bundles SET provider = $1, volume = $2, selling_price = $3, supplier_cost = $4, user_type = $5 WHERE id = $6',
-            [provider, volume, selling_price, supplier_cost, user_type, id]
-        );
+        const { volume, price, supplierPrice } = req.body; // Add supplierPrice here
+// ...
+await db.query(
+    'UPDATE bundles SET volume = $1, price = $2, "supplierPrice" = $3 WHERE id = $4',
+    [volume, price, supplierPrice, id]
+);
         res.status(200).json({ message: 'Bundle updated successfully.' });
-    } catch (error) { /* ... */ }
+    } catch (error) { console.error(error); res.status(500).json({ message: 'Server error.' }); }
 });
+
 // DELETE a bundle
 app.delete('/admin/bundles/:id', authenticateAdmin, async (req, res) => {
     try {
@@ -871,8 +847,6 @@ app.post('/admin/send-test-email', authenticateAdmin, async (req, res) => {
 
 
 // --- PROTECTED USER ROUTES ---
-// ... (Your existing /user/profile route is here) ...
-
 app.get('/user/profile', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -886,126 +860,28 @@ app.get('/user/profile', authenticateToken, async (req, res) => {
     }
 });
 
+// ... (Your existing /user/profile route is here) ...
 
-
-
-// CANCEL A "PROCESSING" ORDER (with Time Check)
-app.post('/user/transactions/:id/cancel', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    const userId = req.user.userId;
-    let client;
-
-    try {
-        client = await db.connect();
-        await client.query('BEGIN');
-
-        // Find the transaction if it belongs to the user
-        const txResult = await client.query(
-            'SELECT * FROM transactions WHERE id = $1 AND "userId" = $2 FOR UPDATE',
-            [id, userId]
-        );
-
-        if (txResult.rows.length === 0) {
-            throw new Error('Transaction not found or you do not have permission.');
-        }
-        
-        const transaction = txResult.rows[0];
-        
-        // --- THIS IS THE CRITICAL NEW LOGIC ---
-
-        // Check 1: Can only cancel if status is 'Processing'
-        if (transaction.status !== 'Processing') {
-            throw new Error('This order can no longer be cancelled.');
-        }
-
-        // Check 2: Check how old the transaction is
-        const transactionTime = new Date(transaction.transactionsDate).getTime();
-        const currentTime = Date.now();
-        const ageInSeconds = (currentTime - transactionTime) / 1000;
-
-        // Set the cancellation window (e.g., 110 seconds = 1 minute 50 seconds)
-        // This gives a 10-second buffer before our 2-minute worker runs.
-        const cancellationWindowSeconds = 110; 
-
-        if (ageInSeconds > cancellationWindowSeconds) {
-            throw new Error(`Cancellation window of ${cancellationWindowSeconds} seconds has passed.`);
-        }
-
-        // 2. Refund the amount to the user's wallet
-        const refundAmount = parseFloat(transaction.amount);
-        await client.query(
-            'UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2',
-            [refundAmount, userId]
-        );
-
-        // 3. Update the transaction's status to 'Cancelled'
-        await client.query(
-            "UPDATE transactions SET status = 'Cancelled' WHERE id = $1",
-            [id]
-        );
-        
-        // 4. If everything succeeds, commit the changes
-        await client.query('COMMIT');
-
-        console.log(`User ${userId} cancelled Order ID ${id}. Refunded: ${refundAmount}`);
-        res.status(200).json({ message: 'Order has been successfully cancelled and your wallet has been refunded.' });
-
-    } catch (error) {
-        if (client) { await client.query('ROLLBACK'); }
-        console.error('Error cancelling order:', error);
-        res.status(500).json({ message: 'An error occurred while cancelling the order.' });
-    } finally {
-        if (client) { client.release(); }
-    }
-});
-
-// GET DASHBOARD SUMMARY DATA (UPDATED FOR REFERRALS AND COMMISSION)
+// GET DASHBOARD SUMMARY DATA
 app.get('/user/dashboard-summary', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
-
-        // Query 1 (IMPROVED): Get all user-specific data in one go
-        const userQuery = 'SELECT "walletBalance", "commissionBalance", "referralCode" FROM users WHERE id = $1';
-        const userRes = await db.query(userQuery, [userId]);
-
-        if (userRes.rows.length === 0) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-        const userData = userRes.rows[0];
-
-        // Query 2: Get total number of ALL orders
-        const ordersQuery = 'SELECT COUNT(id) as total FROM transactions WHERE "userId" = $1';
-        const ordersRes = await db.query(ordersQuery, [userId]);
-
-        // Query 3: Get total sales (bundle purchases)
-        const salesQuery = 'SELECT SUM(amount) as total FROM transactions WHERE "userId" = $1 AND type != $2';
-        const salesRes = await db.query(salesQuery, [userId, 'Top-Up']);
-
-        // Query 4: Get total top-ups
-        const topupsQuery = 'SELECT COUNT(id) as count, SUM(amount) as value FROM transactions WHERE "userId" = $1 AND type = $2';
-        const topupsRes = await db.query(topupsQuery, [userId, 'Top-Up']);
-        
-        // Query 5 (NEW): Get total number of referees
-        const refereeQuery = 'SELECT COUNT(id) as totalReferees FROM users WHERE "referrerId" = $1';
-        const refereeRes = await db.query(refereeQuery, [userId]);
-
-        // Assemble the final JSON response with all data
+        const userRes = await db.query('SELECT "walletBalance" FROM users WHERE id = $1', [userId]);
+        const ordersRes = await db.query('SELECT COUNT(id) as total FROM transactions WHERE "userId" = $1', [userId]);
+        const salesRes = await db.query('SELECT SUM(amount) as total FROM transactions WHERE "userId" = $1 AND type != $2', [userId, 'Top-Up']);
+        const topupsRes = await db.query('SELECT COUNT(id) as count, SUM(amount) as value FROM transactions WHERE "userId" = $1 AND type = $2', [userId, 'Top-Up']);
         res.status(200).json({
-            walletBalance: userData.walletBalance,
-            commissionBalance: userData.commissionBalance || 0,
-            referralCode: userData.referralCode,
-            totalOrders: ordersRes.rows[0].total || 0,
+            walletBalance: userRes.rows[0].walletBalance,
+            totalOrders: ordersRes.rows[0].total,
             totalSales: salesRes.rows[0].total || 0,
             totalTopUps: topupsRes.rows[0].count || 0,
-            totalTopUpValue: topupsRes.rows[0].value || 0,
-            totalReferees: refereeRes.rows[0].totalreferees || 0
+            totalTopUpValue: topupsRes.rows[0].value || 0
         });
-
-    } catch (error) {
-        console.error('Error fetching dashboard summary:', error);
-        res.status(500).json({ message: 'Server error while fetching summary data.' });
-    }
+    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
+
+
+
 
 
 
@@ -1076,60 +952,7 @@ app.get('/user/transactions/all', authenticateToken, async (req, res) => {
     } catch (error) { res.status(500).json({ message: 'Server error.' }); }
 });
 
-// WITHDRAW COMMISSION TO MAIN WALLET (NEW)
-app.post('/user/commission/withdraw', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
-    let client;
 
-    try {
-        client = await db.connect();
-        await client.query('BEGIN'); // Start a secure transaction
-
-        // 1. Get the user's current commission balance and lock the row
-        const userResult = await client.query(
-            'SELECT "commissionBalance" FROM users WHERE id = $1 FOR UPDATE',
-            [userId]
-        );
-
-        if (userResult.rows.length === 0) {
-            throw new Error('User not found.');
-        }
-
-        const commissionBalance = parseFloat(userResult.rows[0].commissionBalance);
-
-        // 2. Check if there is any commission to withdraw
-        if (commissionBalance <= 0) {
-            throw new Error('You have no commission to withdraw.');
-        }
-
-        // 3. Perform the transfer:
-        //    - Add the commission amount to the main walletBalance
-        //    - Reset the commissionBalance to 0
-        await client.query(
-            'UPDATE users SET "walletBalance" = "walletBalance" + $1, "commissionBalance" = 0 WHERE id = $2',
-            [commissionBalance, userId]
-        );
-        
-        // 4. (Optional but Recommended) Create a transaction record for this event
-        await client.query(
-            'INSERT INTO transactions ("userId", type, details, amount, status) VALUES ($1, $2, $3, $4, $5)',
-            [userId, 'Commission Payout', 'Commission moved to main wallet', commissionBalance, 'Completed']
-        );
-
-        // 5. If everything succeeds, commit the changes
-        await client.query('COMMIT');
-
-        console.log(`User ${userId} withdrew ${commissionBalance} commission to main wallet.`);
-        res.status(200).json({ message: `Successfully moved GH₵ ${commissionBalance.toFixed(2)} to your main wallet.` });
-
-    } catch (error) {
-        if (client) { await client.query('ROLLBACK'); }
-        console.error('Error during commission withdrawal:', error);
-        res.status(400).json({ message: error.message || 'An error occurred.' });
-    } finally {
-        if (client) { client.release(); }
-    }
-});
 
 
 /*
@@ -1209,69 +1032,8 @@ app.post('/initialize-payment', authenticateToken, async (req, res) => {
 
 
 
-
-
-app.post('/purchase-bundle', authenticateToken, async (req, res) => {
-    // THIS IS THE FIX: Define client outside the try block
-    let client;
-    try {
-        client = await db.connect(); // Assign the connection to the client
-        await client.query('BEGIN');
-
-        const { type, details, amount, recipient } = req.body;
-        const userId = req.user.userId;
-
-        const bundleResult = await client.query('SELECT * FROM bundles WHERE provider = $1 AND volume = $2 AND "isActive" = true', [type, details]);
-        if (bundleResult.rows.length === 0) throw new Error('Bundle not available.');
-        const bundle = bundleResult.rows[0];
-        const sellingPrice = parseFloat(bundle.selling_price);
-        const supplierPrice = parseFloat(bundle.supplier_cost);
-
-        if (sellingPrice !== amount) throw new Error('Price mismatch error.');
-        
-        const userResult = await client.query('SELECT "walletBalance" FROM users WHERE id = $1 FOR UPDATE', [userId]);
-        const currentBalance = parseFloat(userResult.rows[0].walletBalance);
-        
-        if (currentBalance < sellingPrice) throw new Error('Insufficient wallet balance.');
-        
-        const profit = sellingPrice - supplierPrice;
-        const commission = sellingPrice * 0.0002;
-        const newBalance = currentBalance - sellingPrice;
-
-        await client.query('UPDATE users SET "walletBalance" = $1, "commissionBalance" = "commissionBalance" + $2 WHERE id = $3', [newBalance, commission, userId]);
-        
-        const randomOrderId = Math.floor(1000 + Math.random() * 9000);
-
-        const insertResult = await client.query(
-            'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient, profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-            [userId, randomOrderId, type, details, sellingPrice, 'Processing', recipient, profit]
-        );
-        
-        addTransactionToQueue(insertResult.rows[0].id);
-        
-        await client.query('COMMIT');
-        
-        res.status(200).json({ message: 'Purchase successful! Your order is being processed.', newBalance });
-
-    } catch (error) {
-        if (client) { // Safety check
-            await client.query('ROLLBACK');
-        }
-        console.error('Error during bundle purchase:', error);
-        res.status(500).json({ message: error.message || 'An error occurred during the purchase.' });
-    } finally {
-        if (client) { // Safety check
-            client.release(); // Now 'client' is accessible here
-        }
-    }
-});
-
-
-
-/*
-//WORKING CODE
-
-
+// Data Bundle Purchase (with Profit Calculation)
+// Data Bundle Purchase (Final Corrected Version with Profit and Security)
 app.post('/purchase-bundle', authenticateToken, async (req, res) => {
     const client = await db.connect();
     try {
@@ -1311,7 +1073,7 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
             await client.query('ROLLBACK'); // Cancel all changes
             return res.status(402).json({ message: 'Insufficient wallet balance. Please top up your wallet.' });
         }
-
+        
         // --- 3. IF CHECKS PASS, PROCESS THE TRANSACTION ---
 
         // Calculate the profit for this transaction
@@ -1349,9 +1111,6 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         client.release();
     }
 });
-
-*/
-
 
 
 

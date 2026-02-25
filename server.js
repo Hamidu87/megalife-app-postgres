@@ -860,6 +860,69 @@ app.get('/user/profile', authenticateToken, async (req, res) => {
     }
 });
 
+
+
+
+
+
+// CANCEL A "PROCESSING" ORDER (NEW)
+app.post('/user/transactions/:id/cancel', authenticateToken, async (req, res) => {
+    const { id } = req.params; // The ID of the transaction to cancel
+    const userId = req.user.userId;
+    let client;
+
+    try {
+        client = await db.connect();
+        await client.query('BEGIN'); // Start a secure transaction
+
+        // 1. Find the transaction, but ONLY if it belongs to the logged-in user and is 'Processing'
+        const txResult = await client.query(
+            'SELECT * FROM transactions WHERE id = $1 AND "userId" = $2 FOR UPDATE',
+            [id, userId]
+        );
+
+        if (txResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Transaction not found or you do not have permission to cancel it.' });
+        }
+        
+        const transaction = txResult.rows[0];
+        if (transaction.status !== 'Processing') {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: 'This order can no longer be cancelled.' });
+        }
+
+        // 2. Refund the amount to the user's wallet
+        const refundAmount = parseFloat(transaction.amount);
+        await client.query(
+            'UPDATE users SET "walletBalance" = "walletBalance" + $1 WHERE id = $2',
+            [refundAmount, userId]
+        );
+
+        // 3. Update the transaction's status to 'Cancelled'
+        await client.query(
+            "UPDATE transactions SET status = 'Cancelled' WHERE id = $1",
+            [id]
+        );
+        
+        // 4. If everything succeeds, commit the changes
+        await client.query('COMMIT');
+
+        console.log(`User ${userId} cancelled Order ID ${id}. Refunded: ${refundAmount}`);
+        res.status(200).json({ message: 'Order has been successfully cancelled and your wallet has been refunded.' });
+
+    } catch (error) {
+        if (client) { await client.query('ROLLBACK'); }
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'An error occurred while cancelling the order.' });
+    } finally {
+        if (client) { client.release(); }
+    }
+});
+
+
+
+
 // ... (Your existing /user/profile route is here) ...
 
 // GET DASHBOARD SUMMARY DATA

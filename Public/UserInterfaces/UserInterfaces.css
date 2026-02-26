@@ -1680,14 +1680,15 @@ body {
 }
 
 /* Specific styles for the top-up history table inside the card */
-.topup-history-table-container .table-header,
-.topup-history-table-container .table-row {
+.history-table .table-header,
+.history-table .table-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.5fr 1.5fr; /* 4 columns */
+    /* CORRECTED: New 8-column layout with "Action" first */
+    grid-template-columns: 1fr 0.8fr 1.2fr 1.2fr 0.8fr 1fr 0.8fr 1.2fr;
     align-items: center;
     gap: 15px;
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9edf4;
 }
 
 .topup-history-table-container .table-header {

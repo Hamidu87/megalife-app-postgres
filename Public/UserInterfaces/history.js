@@ -247,76 +247,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Function to fetch and build the BUNDLE ORDERS table (UPDATED)
-    async function fetchBundleOrders(page = 1) {
-        const tableContainer = document.getElementById('bundle-orders-table');
-        if (!tableContainer) return;
+   async function fetchBundleOrders(page = 1) {
+    const tableContainer = document.getElementById('bundle-orders-table');
+    if (!tableContainer) return;
 
-        tableContainer.innerHTML = '<div class="empty-state">Loading...</div>';
-        try {
-            const response = await fetch(`https://megalife-app-postgres.onrender.com/user/transactions/bundles?page=${page}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+    tableContainer.innerHTML = '<div class="empty-state">Loading your bundle orders...</div>';
+    try {
+        const response = await fetch(`https://megalife-app-postgres.onrender.com/user/transactions/bundles?page=${page}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const data = await response.json();
+        currentPage = data.currentPage;
+        totalPages = data.totalPages;
+
+        // --- THIS IS THE CRITICAL FIX: Reorder the header ---
+        let tableHTML = `
+            <div class="table-header">
+                <span>Action</span>
+                <span>Order ID</span>
+                <span>Recipient</span>
+                <span>Status</span>
+                <span>Volume</span>
+                <span>Amount(GHS)</span>
+                <span>Network</span>
+                <span>Date & Time</span>
+            </div>`;
+        
+        if (data.transactions.length > 0) {
+            data.transactions.forEach(tx => {
+                const dateObj = new Date(tx.transactionsDate);
+                const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                const status = tx.status.toLowerCase();
+                
+                let statusBadgeClass = 'status-pending';
+                if (status === 'completed') statusBadgeClass = 'status-delivered';
+                else if (status === 'failed') statusBadgeClass = 'status-failed';
+                else if (status === 'cancelled') statusBadgeClass = 'status-cancelled';
+
+                // Conditionally create the Action cell
+                let actionCell = ''; // Empty by default
+                if (status === 'processing') {
+                    actionCell = `<button class="cancel-btn" data-id="${tx.id}">Cancel</button>`;
+                }
+                
+                // --- THIS IS THE CRITICAL FIX: Reorder the row data ---
+                tableHTML += `
+                    <div class="table-row">
+                        <td>${actionCell}</td>
+                        <span><a href="#" class="order-id-link">#${tx.orderId || tx.id}</a></span>
+                        <span>${tx.recipient || 'N/A'}</span>
+                        <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
+                        <span class="volume"><a href="#">${tx.details}</a></span>
+                        <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
+                        <span>${tx.type}</span>
+                        <span class="date-time">${formattedDate}<br>${formattedTime}</span>
+                    </div>
+                `;
             });
-            if (!response.ok) throw new Error('Failed to fetch data');
-            
-            const data = await response.json();
-            currentPage = data.currentPage;
-            totalPages = data.totalPages;
-
-            let tableHTML = `
-                <div class="table-header">
-                    <span>Action</span><span>Order ID</span><span>Recipient</span><span>Status</span><span>Volume</span><span>Amount(GHS)</span><span>Network</span><span>Date & Time</span><span>Notice</span>
-                </div>`;
-            
-            if (data.transactions.length > 0) {
-                data.transactions.forEach(tx => {
-                    const dateObj = new Date(tx.transactionsDate);
-                    const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                    const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-                    let status = tx.status.toLowerCase();
-                    let statusBadgeClass = 'status-pending';
-                    let noticeCell = 'Your order is currently being processed';
-
-                    if (status === 'completed') {
-                        statusBadgeClass = 'status-delivered';
-                        noticeCell = 'Order delivered successfully';
-                    } else if (status === 'failed') {
-                        statusBadgeClass = 'status-failed';
-                        noticeCell = 'Order failed. Please contact support.';
-                    } else if (status === 'cancelled') {
-                        statusBadgeClass = 'status-cancelled'; // You'll need to add CSS for this
-                        noticeCell = 'This order has been cancelled.';
-                    }
-                    
-                    // THIS IS THE CRITICAL CHANGE:
-                    // If the order is 'Processing', the noticeCell becomes a Cancel button
-                    if (status === 'processing') {
-                        noticeCell = `<button class="cancel-btn" data-id="${tx.id}">Cancel</button>`;
-                    }
-                    
-                    tableHTML += `
-                        <div class="table-row">
-                            <span><a href="#" class="order-id-link">#${tx.orderId || tx.id}</a></span>
-                            <span>${tx.recipient || 'N/A'}</span>
-                            <span><span class="status-badge ${statusBadgeClass}">${tx.status}</span></span>
-                            <span class="volume"><a href="#">${tx.details}</a></span>
-                            <span>GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>
-                            <span>${tx.type}</span>
-                            <span class="date-time">${formattedDate}<br>${formattedTime}</span>
-                            <td>${noticeCell}</td>
-                        </div>
-                    `;
-                });
-            } else {
-                tableHTML += `<div class="empty-state">No bundle orders found.</div>`;
-            }
-            tableContainer.innerHTML = tableHTML;
-            updatePaginationControls();
-        } catch (error) {
-            console.error("Failed to fetch bundle orders:", error);
-            tableContainer.innerHTML = `<div class="empty-state">Error loading orders.</div>`;
+        } else {
+            tableHTML += `<div class="empty-state">No bundle orders found.</div>`;
         }
+        tableContainer.innerHTML = tableHTML;
+        updatePaginationControls();
+    } catch (error) {
+        console.error("Failed to fetch bundle orders:", error);
+        tableContainer.innerHTML = `<div class="empty-state">Error loading orders.</div>`;
     }
+}
 
 
 

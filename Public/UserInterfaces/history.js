@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let tableHTML = `
                 <div class="table-header">
-                    <span>Order ID</span><span>Recipient</span><span>Status</span><span>Volume</span><span>Amount(GHS)</span><span>Network</span><span>Date & Time</span><span>Notice/Action</span>
+                    <span>Action</span><span>Order ID</span><span>Recipient</span><span>Status</span><span>Volume</span><span>Amount(GHS)</span><span>Network</span><span>Date & Time</span><span>Notice</span>
                 </div>`;
             
             if (data.transactions.length > 0) {

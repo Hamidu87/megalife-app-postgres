@@ -30,6 +30,7 @@
 </li>
                     <li class="menu-item"><a href="#" data-target="allTransactionsContent"><i class="fas fa-list-ul"></i><span>All Transactions</span></a></li>
                     <li class="menu-item"><a href="#" data-target="dataBundlesContent"><i class="fas fa-box-open"></i><span>Data Bundles</span></a></li>
+                     <li class="menu-item"><a href="#" data-target="userBundlesContent"><i class="fas fa-user-tag"></i><span>User Pricing</span></a></li>
                     <li class="menu-item"><a href="#" data-target="apiSettingsContent"><i class="fas fa-cog"></i><span>API Settings</span></a></li>
                     <li class="menu-item"><a href="#" data-target="supportContent"><i class="fas fa-life-ring"></i><span>Support</span></a></li>
                     <li class="menu-item"><a href="#" data-target="apiDocsContent"><i class="fas fa-file-alt"></i><span>API Docs</span></a></li>
@@ -116,7 +117,7 @@
                <!-- 3. Data Bundles Content (CORRECTED) -->
                 <section class="tab-pane data-bundles-grid" id="dataBundlesContent">
                     <div class="bundle-card">
-                        <div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p>Manage data bundles for MTN.</p></div>
+                        <div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p>Manage Agent Pricing.</p></div>
                         <div class="bundle-table">
                             <!-- ADDED SUPPLIER COST HEADER -->
                             <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
@@ -141,6 +142,41 @@
                         <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
                     </div>
                 </section>
+                 <!-- ADD THIS NEW CONTENT PANE -->
+        <section class="tab-pane" id="userBundlesContent">
+            <div class="page-header">
+                <h3>Manage User (Subscriber) Pricing</h3>
+                <p>Set the data bundle prices for regular users.</p>
+            </div>
+            <div class="bundle-management-container" id="user-bundles-container">
+                <!-- JavaScript will build the bundle cards here -->
+            </div>
+             <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title mtn"><i class="fas fa-circle"></i> MTN</h3><p>Manage data bundles for MTN.</p></div>
+                        <div class="bundle-table">
+                            <!-- ADDED SUPPLIER COST HEADER -->
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
+                    <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title airteltigo"><i class="fas fa-circle"></i> AirtelTigo</h3><p>Manage bundles for AirtelTigo.</p></div>
+                        <div class="bundle-table">
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
+                    <div class="bundle-card">
+                        <div class="bundle-card-header"><h3 class="bundle-title telecel"><i class="fas fa-circle"></i> Telecel</h3><p>Manage bundles for Telecel.</p></div>
+                        <div class="bundle-table">
+                            <div class="table-header the-header"><span>Volume</span><span>Selling Price</span><span>Supplier Cost</span><span>Actions</span></div>
+                            <div class="table-body"></div>
+                        </div>
+                        <div class="bundle-card-footer"><button class="add-bundle-btn"><i class="fas fa-plus"></i> Add Bundle</button></div>
+                    </div>
+        </section>
 
                 <!-- 4. API Settings Content -->
                 <section class="card tab-pane" id="apiSettingsContent">

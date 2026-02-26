@@ -250,7 +250,6 @@ app.post('/register', async (req, res) => {
 
 
 
-// NEW: Email Verification Route
 // Email Verification Route (Final PostgreSQL Version)
 app.post('/verify-email', async (req, res) => {
     try {
@@ -286,8 +285,7 @@ app.post('/verify-email', async (req, res) => {
     }
 });
 
-// GET ALL ACTIVE BUNDLES (for user purchase pages)
-// This is the final, correct version for PostgreSQL
+
 // GET ALL ACTIVE BUNDLES (Final PostgreSQL Version)
 app.get('/bundles', async (req, res) => {
     try {
@@ -569,6 +567,53 @@ app.get('/admin/users', authenticateAdmin, async (req, res) => {
     }
 });
 
+
+
+// --- USER BUNDLE MANAGEMENT (CRUD - NEW) ---
+
+// READ all user bundles
+app.get('/admin/user-bundles', authenticateAdmin, async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM user_bundles ORDER BY provider, selling_price');
+        res.status(200).json(result.rows);
+    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
+});
+
+// CREATE a new user bundle
+app.post('/admin/user-bundles', authenticateAdmin, async (req, res) => {
+    try {
+        const { provider, volume, selling_price, supplier_cost } = req.body;
+        // ... validation ...
+        await db.query(
+            'INSERT INTO user_bundles (provider, volume, selling_price, supplier_cost) VALUES ($1, $2, $3, $4)',
+            [provider, volume, selling_price, supplier_cost]
+        );
+        res.status(201).json({ message: 'User bundle created successfully.' });
+    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
+});
+
+// UPDATE a user bundle
+app.put('/admin/user-bundles/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { provider, volume, selling_price, supplier_cost } = req.body;
+        // ... validation ...
+        await db.query(
+            'UPDATE user_bundles SET provider = $1, volume = $2, selling_price = $3, supplier_cost = $4 WHERE id = $5',
+            [provider, volume, selling_price, supplier_cost, id]
+        );
+        res.status(200).json({ message: 'User bundle updated successfully.' });
+    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
+});
+
+// DELETE a user bundle
+app.delete('/admin/user-bundles/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query('DELETE FROM user_bundles WHERE id = $1', [id]);
+        res.status(200).json({ message: 'User bundle deleted successfully.' });
+    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
+});
 
 
 

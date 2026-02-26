@@ -123,10 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', async (e) => {
         // Bundle Clicks
         if (e.target.closest('.add-bundle-btn')) openBundleModal();
+         // UPDATED: "Add Bundle" buttons now know their type
+        const addBtn = e.target.closest('.add-bundle-btn');
+        if (addBtn) {
+            currentBundleType = addBtn.dataset.type; // 'agent' or 'user'
+            const provider = addBtn.dataset.provider;
+            openBundleModal(provider, null, currentBundleType); // Pass the type
+        }
+
         
-        const editBundleBtn = e.target.closest('.bundle-table .action-edit');
-        if (editBundleBtn) {
-            const id = editBundleBtn.closest('.table-row').dataset.id;
+         const editBtn = e.target.closest('.action-edit');
+        if (editBtn) {
+            currentBundleType = editBtn.closest('.bundle-management-container').id === 'agent-bundles-container' ? 'agent' : 'user';
+            const id = editBtn.closest('tr').dataset.id;
             try {
                 const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles`, { headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' } });
                 const bundles = await response.json();
@@ -224,18 +233,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     
-    function openBundleModal(bundle = null) {
+    // UPDATED: openBundleModal now knows the type
+    function openBundleModal(provider = null, bundle = null, type = 'agent') {
         if (!bundleForm) return;
         bundleForm.reset();
-        if (bundle) {
-            document.getElementById('modal-title').textContent = 'Edit Bundle';
-            document.getElementById('bundle-id').value = bundle.id;
-            document.getElementById('bundle-provider').value = bundle.provider;
-            document.getElementById('bundle-volume').value = bundle.volume;
-            document.getElementById('bundle-price').value = bundle.price;
-        } else {
-            document.getElementById('modal-title').textContent = 'Add New Bundle';
-            document.getElementById('bundle-id').value = '';
+        currentBundleType = type; // Store the type globally
+
+        if (bundle) { // Editing
+            document.getElementById('modal-title').textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Bundle`;
+            // ... (fill form with bundle data) ...
+        } else { // Adding
+            document.getElementById('modal-title').textContent = `Add New ${type.charAt(0).toUpperCase() + type.slice(1)} Bundle`;
+            // ... (clear form, pre-select provider) ...
         }
         if (modal) modal.hidden = false;
     }
@@ -259,17 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
             supplierPrice: document.getElementById('bundle-supplier-price').value,
         };
         const isEditing = !!id;
+        const endpoint = (currentBundleType === 'agent') ? '/admin/bundles' : '/admin/user-bundles';
         const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/bundles`;
         const method = isEditing ? 'PUT' : 'POST';
-        try {
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(bundleData)
-            });
-            if (!response.ok) throw new Error('Failed to save bundle.');
+         try {
+            await fetch(url, { method, headers: { /*...*/ }, body: JSON.stringify(bundleData) });
             closeBundleModal();
-            fetchAllBundles();
+            // Refresh the correct table
+            if (currentBundleType === 'agent') fetchAllAgentBundles();
+            else fetchAllUserBundles();
         } catch (error) { alert('Error saving bundle.'); }
     }
     
@@ -443,9 +450,9 @@ async function fetchAllUsers() {
 
 
 
-async function fetchAllBundles() {
-    const bundlesContainer = document.querySelector('#dataBundlesContent');
-    if (!bundlesContainer) return;
+async function fetchAllAgentBundles() {
+        const container = document.getElementById('agent-bundles-container');
+        if (!container) return;
     try {
         const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
         if (!response.ok) throw new Error('Failed to fetch bundles.');
@@ -488,7 +495,32 @@ async function fetchAllBundles() {
 }
 
 
+// NEW FUNCTION for the new tab
+    async function fetchAllUserBundles() {
+        const container = document.getElementById('user-bundles-container');
+        if (!container) return;
+        container.innerHTML = '<div class="empty-state">Loading user bundles...</div>';
 
+        try {
+            // Call the NEW backend endpoint
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error('Failed to fetch user bundles');
+            const bundles = await response.json();
+            
+            // This rendering logic can be extracted into a reusable function
+            // to avoid repeating code from fetchAllAgentBundles
+            renderBundleTables(container, bundles, 'user');
+        } catch (error) {
+            console.error('Error fetching/rendering user bundles:', error);
+            container.innerHTML = '<div class="empty-state">Failed to load user bundles.</div>';
+        }
+    }
+
+    function renderBundleTables(container, bundles, type) {
+        // This new function will contain the logic to group bundles by provider
+        // and build the HTML tables, just like our old fetchAllBundles function did.
+        // It will be called by both fetchAllAgentBundles and fetchAllUserBundles.
+    }
 
 
 

@@ -450,9 +450,9 @@ async function fetchAllUsers() {
 
 
 
-async function fetchAllAgentBundles() {
-        const container = document.getElementById('agent-bundles-container');
-        if (!container) return;
+async function fetchAllBundles() {
+    const bundlesContainer = document.querySelector('#dataBundlesContent');
+    if (!bundlesContainer) return;
     try {
         const response = await fetch('https://megalife-app-postgres.onrender.com/admin/bundles', { headers: { 'Authorization': `Bearer ${token}` } });
         if (!response.ok) throw new Error('Failed to fetch bundles.');
@@ -500,26 +500,18 @@ async function fetchAllAgentBundles() {
         const container = document.getElementById('user-bundles-container');
         if (!container) return;
         container.innerHTML = '<div class="empty-state">Loading user bundles...</div>';
-
         try {
-            // Call the NEW backend endpoint
-            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
+             // This function also has access to the 'token'
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (!response.ok) throw new Error('Failed to fetch user bundles');
             const bundles = await response.json();
-            
-            // This rendering logic can be extracted into a reusable function
-            // to avoid repeating code from fetchAllAgentBundles
             renderBundleTables(container, bundles, 'user');
-        } catch (error) {
-            console.error('Error fetching/rendering user bundles:', error);
+        } catch(error) {
+             console.error('Error rendering user bundles:', error);
             container.innerHTML = '<div class="empty-state">Failed to load user bundles.</div>';
         }
-    }
-
-    function renderBundleTables(container, bundles, type) {
-        // This new function will contain the logic to group bundles by provider
-        // and build the HTML tables, just like our old fetchAllBundles function did.
-        // It will be called by both fetchAllAgentBundles and fetchAllUserBundles.
     }
 
 

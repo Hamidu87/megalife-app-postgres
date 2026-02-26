@@ -1018,22 +1018,6 @@ app.get('/user/transactions/all', authenticateToken, async (req, res) => {
 
 
 
-/*
-app.post('/initialize-payment', authenticateToken, async (req, res) => {
-    try {
-        const { amount } = req.body;
-        const result = await db.query('SELECT email FROM users WHERE id = $1', [req.user.userId]);
-        const response = await paystack.transaction.initialize({
-            email: result.rows[0].email,
-            amount: amount * 100,
-            callback_url: `https://www.megalifeconsult.com/UserInterfaces/userdashboard.html?payment_status=success`,
-            metadata: { user_id: req.user.userId, action: 'wallet_top_up' }
-        });
-        res.status(200).json(response.data);
-    } catch (error) { res.status(500).json({ message: 'Server error.' }); }
-});
-
-*/
 
 
 
@@ -1217,29 +1201,66 @@ function addTransactionToQueue(transactionId) {
     transactionQueue.push(job);
     console.log(`Transaction ID ${transactionId} added to queue.`);
 }
+// This is our "worker" that checks the queue periodically (CORRECTED)
 setInterval(async () => {
     const now = Date.now();
     const jobsToProcess = transactionQueue.filter(job => now >= job.executeAt);
+
     if (jobsToProcess.length > 0) {
-        for (const job of jobsToProcess) {
-            try {
-                const result = await db.query('SELECT * FROM transactions WHERE id = $1', [job.id]);
-                if (result.rows.length > 0) {
-                    await forwardTransaction(result.rows[0]);
-                    await db.query('UPDATE transactions SET status = $1 WHERE id = $2', ['Completed', job.id]);
-                    console.log(`✅ Tx ID ${job.id} forwarded & completed.`);
-                }
-            } catch (error) {
-                await db.query('UPDATE transactions SET status = $1 WHERE id = $2', ['Failed', job.id]);
-                console.error(`❌ Failed to forward Tx ID ${job.id}.`);
-            } finally {
-                const index = transactionQueue.findIndex(j => j.id === job.id);
-                if (index > -1) transactionQueue.splice(index, 1);
+        console.log(`Worker found ${jobsToProcess.length} job(s) to process.`);
+    }
+
+    for (const job of jobsToProcess) {
+        let client;
+        try {
+            client = await db.connect(); // Use a transaction client
+            await client.query('BEGIN');
+            
+            // THIS IS THE CRITICAL FIX:
+            // 1. Get the transaction AND lock the row to prevent other changes.
+            // 2. We ALSO check if the status is still 'Processing'.
+            const txResult = await client.query(
+                'SELECT * FROM transactions WHERE id = $1 AND status = $2 FOR UPDATE', 
+                [job.id, 'Processing']
+            );
+
+            // If no rows are returned, it means the transaction was already cancelled, completed, or doesn't exist.
+            if (txResult.rows.length === 0) {
+                console.log(`Job for Tx ID ${job.id} skipped. Status was not 'Processing'.`);
+                // We still need to commit to end the transaction, even though we did nothing.
+                await client.query('COMMIT');
+                continue; // Move to the next job
+            }
+            
+            const transactionDetails = txResult.rows[0];
+
+            // 3. If the status is 'Processing', forward the transaction.
+            console.log(`Forwarding transaction ID: ${job.id}...`);
+            await forwardTransaction(transactionDetails);
+
+            // 4. Update the status to 'Completed'.
+            await client.query("UPDATE transactions SET status = 'Completed' WHERE id = $1", [job.id]);
+            
+            await client.query('COMMIT'); // Commit all changes
+            console.log(`✅ Transaction ID ${job.id} successfully forwarded and marked as Completed.`);
+
+        } catch (error) {
+            if (client) { await client.query('ROLLBACK'); } // Undo changes on failure
+            // If forwarding fails, mark it as 'Failed'
+            await db.query("UPDATE transactions SET status = 'Failed' WHERE id = $1", [job.id]);
+            console.error(`❌ Failed to process and forward transaction ID ${job.id}. It has been marked as Failed.`);
+        } finally {
+            // ALWAYS remove the job from the queue and release the client
+            const index = transactionQueue.findIndex(j => j.id === job.id);
+            if (index > -1) {
+                transactionQueue.splice(index, 1);
+            }
+            if (client) {
+                client.release();
             }
         }
     }
 }, 30 * 1000);
-
 
 // --- WEBHOOK ROUTE ---
 // Paystack Webhook (Final PostgreSQL Version)

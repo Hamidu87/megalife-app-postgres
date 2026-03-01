@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/bundles`;
         const method = isEditing ? 'PUT' : 'POST';
          try {
-            await fetch(url, { method, headers: { /*...*/ }, body: JSON.stringify(bundleData) });
+            await fetch(url, { method, headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}` }, body: JSON.stringify(bundleData) });
             closeBundleModal();
             // Refresh the correct table
             if (currentBundleType === 'agent') fetchAllAgentBundles();

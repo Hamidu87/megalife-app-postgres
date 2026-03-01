@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const whatsappLinkInput = document.getElementById('whatsapp-link-input');
     const testEmailInput = document.getElementById('test-email-input');
 
+    // NEW: Elements for the USER Bundle Modal
+const userBundleModal = document.getElementById('user-bundle-modal'); // We will add this to the HTML
+const userBundleForm = document.getElementById('user-bundle-form');
+const cancelUserBundleBtn = document.getElementById('cancel-user-bundle-btn');
+
     // --- 3. EVENT LISTENERS ---
 
     // Logout Logic
@@ -81,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bundleForm) bundleForm.addEventListener('submit', handleBundleFormSubmit);
     if (cancelUserBtn) cancelUserBtn.addEventListener('click', () => userModal.hidden = true);
     if (userForm) userForm.addEventListener('submit', handleUserFormSubmit);
-
+    // NEW: User Bundle Modal Form Listeners
+if (cancelUserBundleBtn) cancelUserBundleBtn.addEventListener('click', closeUserBundleModal);
+if (userBundleForm) userBundleForm.addEventListener('submit', handleUserBundleFormSubmit);
     // Support Settings Button Listeners
     if(saveSupportBtn) {
         saveSupportBtn.addEventListener('click', async () => {
@@ -119,6 +126,83 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
+
+document.addEventListener('click', async (e) => {
+
+    // --- AGENT BUNDLE ACTIONS ---
+
+    // Handle "Add Agent Bundle" click
+    const addAgentBtn = e.target.closest('#agent-bundles-container .add-bundle-btn');
+    if (addAgentBtn) {
+        openBundleModal(addAgentBtn.dataset.provider, 'Agent'); // Pass 'Agent' as the type
+    }
+
+    // Handle "Edit Agent Bundle" icon click
+    const editAgentBtn = e.target.closest('#agent-bundles-container .action-edit');
+    if (editAgentBtn) {
+        const id = editAgentBtn.closest('tr').dataset.id;
+        try {
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const bundles = await response.json();
+            const bundleToEdit = bundles.find(b => b.id == id);
+            if (bundleToEdit) openBundleModal(null, null, bundleToEdit);
+        } catch (error) { console.error('Error preparing agent bundle edit:', error); }
+    }
+
+    // Handle "Delete Agent Bundle" icon click
+    const deleteAgentBtn = e.target.closest('#agent-bundles-container .action-delete');
+    if (deleteAgentBtn) {
+        if (confirm('Are you sure you want to delete this AGENT bundle?')) {
+            const id = deleteAgentBtn.closest('tr').dataset.id;
+            try {
+                await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                fetchAllBundles(); // Refresh the agent bundles list
+            } catch (error) { console.error('Failed to delete agent bundle:', error); }
+        }
+    }
+
+
+    // --- USER (SUBSCRIBER) BUNDLE ACTIONS ---
+
+    // Handle "Add User Bundle" click
+    const addUserBtn = e.target.closest('#user-bundles-container .add-bundle-btn');
+    if (addUserBtn) {
+        openUserBundleModal(addUserBtn.dataset.provider);
+    }
+
+    // Handle "Edit User Bundle" icon click
+    const editUserBundleBtn = e.target.closest('#user-bundles-container .action-edit');
+    if (editUserBundleBtn) {
+        const id = editUserBundleBtn.closest('tr').dataset.id;
+        try {
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const bundles = await response.json();
+            const bundleToEdit = bundles.find(b => b.id == id);
+            if (bundleToEdit) openUserBundleModal(null, bundleToEdit);
+        } catch (error) { console.error('Error preparing user bundle edit:', error); }
+    }
+
+    // Handle "Delete User Bundle" icon click
+    const deleteUserBundleBtn = e.target.closest('#user-bundles-container .action-delete');
+    if (deleteUserBundleBtn) {
+        if (confirm('Are you sure you want to delete this USER bundle?')) {
+            const id = deleteUserBundleBtn.closest('tr').dataset.id;
+            try {
+                await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                fetchAllUserBundles(); // Refresh the user bundles list
+            } catch (error) { console.error('Failed to delete user bundle:', error); }
+        }
+    }
+
+
+
+
+
+
+
+
+    /*
     // Page-wide listener for DYNAMICALLY created buttons (Edit, Delete, Forward, etc.)
     document.addEventListener('click', async (e) => {
         // Bundle Clicks
@@ -177,6 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) { alert('Failed to delete user.'); }
             }
         }
+        */
+
+
+
+
 
         // Transaction Clicks
        // NEW: Handle "Forward Now" button click
@@ -252,7 +341,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// --- USER BUNDLE MODAL FUNCTIONS (NEW & SEPARATE) ---
 
+function openUserBundleModal(provider = null, bundle = null) {
+    if (!userBundleForm) return;
+    userBundleForm.reset();
+    
+    if (bundle) { // Editing
+        document.getElementById('user-modal-title').textContent = 'Edit User Bundle';
+        document.getElementById('user-bundle-id').value = bundle.id;
+        document.getElementById('user-bundle-provider').value = bundle.provider;
+        document.getElementById('user-bundle-volume').value = bundle.volume;
+        document.getElementById('user-bundle-selling-price').value = bundle.selling_price;
+        document.getElementById('user-bundle-supplier-cost').value = bundle.supplier_cost;
+    } else { // Adding
+        document.getElementById('user-modal-title').textContent = 'Add New User Bundle';
+        document.getElementById('user-bundle-id').value = '';
+        document.getElementById('user-bundle-provider').value = provider;
+    }
+    if (userBundleModal) userBundleModal.hidden = false;
+}
+
+function closeUserBundleModal() {
+    if (userBundleModal) userBundleModal.hidden = true;
+}
+
+async function handleUserBundleFormSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('user-bundle-id').value;
+    const bundleData = {
+        provider: document.getElementById('user-bundle-provider').value,
+        volume: document.getElementById('user-bundle-volume').value,
+        selling_price: document.getElementById('user-bundle-selling-price').value,
+        supplier_cost: document.getElementById('user-bundle-supplier-cost').value,
+    };
+    
+    const isEditing = !!id;
+    const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/user-bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/user-bundles`;
+    const method = isEditing ? 'PUT' : 'POST';
+
+    try {
+        await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(bundleData)
+        });
+        closeUserBundleModal();
+        fetchAllUserBundles(); // Refresh the user bundle list
+    } catch (error) {
+        alert('Error saving user bundle.');
+    }
+}
 
     
 
@@ -312,6 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { alert('Failed to save user changes.'); }
     }
 
+
+
+    
     // --- 5. DATA FETCHING FUNCTIONS ---
     
     // Replace the existing fetchAllUsers function in your admin-dashboard.js

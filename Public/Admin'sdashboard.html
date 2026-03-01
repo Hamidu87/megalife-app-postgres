@@ -271,36 +271,35 @@
 
 <!-- ... your bundle-modal is here ... -->
 
-<!-- MODAL FOR EDITING USERS -->
-<div class="modal-overlay" id="user-modal" hidden>
+<!-- NEW MODAL FOR ADDING/EDITING USER BUNDLES -->
+<div class="modal-overlay" id="user-bundle-modal" hidden>
     <div class="modal-content">
-        <h3 id="user-modal-title">Edit User</h3>
-        <form id="user-form">
-            <input type="hidden" id="user-id">
+        <h3 id="user-modal-title">Add New User Bundle</h3>
+        <form id="user-bundle-form">
+            <input type="hidden" id="user-bundle-id">
             <div class="form-group-modal">
-                <label for="user-fullName">Full Name</label>
-                <input type="text" id="user-fullName" required>
+                <label for="user-bundle-provider">Provider</label>
+                <select id="user-bundle-provider" required><!-- options --></select>
             </div>
             <div class="form-group-modal">
-                <label for="user-email">Email</label>
-                <input type="email" id="user-email" required>
+                <label for="user-bundle-volume">Volume</label>
+                <input type="text" id="user-bundle-volume" required>
             </div>
             <div class="form-group-modal">
-                <label for="user-telephone">Telephone</label>
-                <input type="text" id="user-telephone">
+                <label for="user-bundle-selling-price">Selling Price (GH₵)</label>
+                <input type="number" step="0.01" id="user-bundle-selling-price" required>
             </div>
             <div class="form-group-modal">
-                <label for="user-country">Country</label>
-                <input type="text" id="user-country">
+                <label for="user-bundle-supplier-cost">Supplier Cost (GH₵)</label>
+                <input type="number" step="0.01" id="user-bundle-supplier-cost" required>
             </div>
             <div class="modal-actions">
-                <button type="button" id="cancel-user-btn">Cancel</button>
-                <button type="submit" id="save-user-btn">Save Changes</button>
+                <button type="button" id="cancel-user-bundle-btn">Cancel</button>
+                <button type="submit">Save User Bundle</button>
             </div>
         </form>
     </div>
 </div>
-
 <!-- ... your script tags are here ... -->
 </body>
 </html>

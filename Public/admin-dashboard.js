@@ -234,20 +234,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     
     // UPDATED: openBundleModal now knows the type
-    function openBundleModal(provider = null, bundle = null, type = 'agent') {
+     function openBundleModal(bundle = null) {
         if (!bundleForm) return;
         bundleForm.reset();
-        currentBundleType = type; // Store the type globally
-
-        if (bundle) { // Editing
-            document.getElementById('modal-title').textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Bundle`;
-            // ... (fill form with bundle data) ...
-        } else { // Adding
-            document.getElementById('modal-title').textContent = `Add New ${type.charAt(0).toUpperCase() + type.slice(1)} Bundle`;
-            // ... (clear form, pre-select provider) ...
+        if (bundle) {
+            document.getElementById('modal-title').textContent = 'Edit Bundle';
+            document.getElementById('bundle-id').value = bundle.id;
+            document.getElementById('bundle-provider').value = bundle.provider;
+            document.getElementById('bundle-volume').value = bundle.volume;
+            document.getElementById('bundle-price').value = bundle.price;
+        } else {
+            document.getElementById('modal-title').textContent = 'Add New Bundle';
+            document.getElementById('bundle-id').value = '';
         }
         if (modal) modal.hidden = false;
     }
+
 
 
 

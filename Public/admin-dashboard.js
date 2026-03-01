@@ -268,10 +268,9 @@ document.addEventListener('DOMContentLoaded', () => {
             supplierPrice: document.getElementById('bundle-supplier-price').value,
         };
         const isEditing = !!id;
-       const endpoint = (userType === 'Agent') ? '/admin/bundles' : '/admin/user-bundles';
-    const baseUrl = 'https://megalife-app-postgres.onrender.com';
-    const url = isEditing ? `${baseUrl}${endpoint}/${id}` : `${baseUrl}${endpoint}`;
-    const method = isEditing ? 'PUT' : 'POST';
+        const endpoint = (currentBundleType === 'agent') ? '/admin/bundles' : '/admin/user-bundles';
+        const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/bundles`;
+        const method = isEditing ? 'PUT' : 'POST';
          try {
             await fetch(url, { method, headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}` }, body: JSON.stringify(bundleData) });
             closeBundleModal();

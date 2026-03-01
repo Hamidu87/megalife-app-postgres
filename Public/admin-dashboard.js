@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendTestEmailBtn = document.getElementById('send-test-email-btn');
     const whatsappLinkInput = document.getElementById('whatsapp-link-input');
     const testEmailInput = document.getElementById('test-email-input');
+    // Global variable to track which bundle type is being edited/added
+    let currentBundleType = 'agent';
 
     // --- 3. EVENT LISTENERS ---
 
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (targetId === 'allTransactionsContent') fetchAllTransactions();
             else if (targetId === 'dataBundlesContent') fetchAllBundles();
             else if (targetId === 'supportContent') fetchAllSettings();
-            
+             else if (targetId === 'userBundlesContent') fetchAllUserBundles();
             else if (targetId === 'profitAnalyticsContent') fetchProfitAnalytics();
         });
     });
@@ -234,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. FORM & MODAL HANDLER FUNCTIONS ---
     
     // UPDATED: openBundleModal now knows the type
+    /*
     function openBundleModal(provider = null, bundle = null, type = 'agent') {
         if (!bundleForm) return;
         bundleForm.reset();
@@ -248,13 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (modal) modal.hidden = false;
     }
-
-
-
-
-    
-
-
 
 
     function closeBundleModal() { if (modal) modal.hidden = true; }
@@ -272,13 +268,60 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = isEditing ? `https://megalife-app-postgres.onrender.com/admin/bundles/${id}` : `https://megalife-app-postgres.onrender.com/admin/bundles`;
         const method = isEditing ? 'PUT' : 'POST';
          try {
-            await fetch(url, { method, headers: { /*...*/ }, body: JSON.stringify(bundleData) });
+            await fetch(url, { method, headers: {  }, body: JSON.stringify(bundleData) });
             closeBundleModal();
             // Refresh the correct table
             if (currentBundleType === 'agent') fetchAllAgentBundles();
             else fetchAllUserBundles();
         } catch (error) { alert('Error saving bundle.'); }
     }
+        */
+
+
+    function openBundleModal(provider, userType, bundle = null) {
+        if (!bundleForm) return;
+        bundleForm.reset();
+        currentBundleType = userType;
+        if (bundle) {
+            document.getElementById('modal-title').textContent = `Edit ${bundle.user_type} Bundle`;
+            document.getElementById('bundle-id').value = bundle.id;
+            document.getElementById('bundle-user-type').value = bundle.user_type;
+            document.getElementById('bundle-provider').value = bundle.provider;
+            document.getElementById('bundle-volume').value = bundle.volume;
+            document.getElementById('bundle-selling-price').value = bundle.selling_price;
+            document.getElementById('bundle-supplier-cost').value = bundle.supplier_cost;
+        } else {
+            document.getElementById('modal-title').textContent = `Add New ${userType} Bundle`;
+            document.getElementById('bundle-id').value = '';
+            document.getElementById('bundle-user-type').value = userType;
+            document.getElementById('bundle-provider').value = provider;
+        }
+        if (modal) modal.hidden = false;
+    }
+    
+    function closeBundleModal() { if (modal) modal.hidden = true; }
+
+    async function handleBundleFormSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('bundle-id').value;
+        const bundleData = {
+            provider: document.getElementById('bundle-provider').value,
+            volume: document.getElementById('bundle-volume').value,
+            selling_price: document.getElementById('bundle-selling-price').value,
+            supplier_cost: document.getElementById('bundle-supplier-cost').value,
+            user_type: document.getElementById('bundle-user-type').value
+        };
+        const isEditing = !!id;
+        const endpoint = (bundleData.user_type === 'Agent') ? '/admin/bundles' : '/admin/user-bundles';
+        const url = isEditing ? `https://megalife-app-postgres.onrender.com${endpoint}/${id}` : `https://megalife-app-postgres.onrender.com${endpoint}`;
+        const method = isEditing ? 'PUT' : 'POST';
+        try {
+            await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bundleData) });
+            closeBundleModal();
+            if (bundleData.user_type === 'Agent') fetchAllBundles(); else fetchAllUserBundles();
+        } catch (error) { alert('Error saving bundle.'); }
+
+
     
     function openUserModal(user) {
         if (!userForm) return;
@@ -290,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-country').value = user.country;
         if (userModal) userModal.hidden = false;
     }
+        
     async function handleUserFormSubmit(e) {
         e.preventDefault();
         const id = document.getElementById('user-id').value;
@@ -309,6 +353,13 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAllUsers();
         } catch (error) { alert('Failed to save user changes.'); }
     }
+
+
+
+
+
+
+
 
     // --- 5. DATA FETCHING FUNCTIONS ---
     
@@ -450,6 +501,9 @@ async function fetchAllUsers() {
 
 
 
+
+
+    /*
 async function fetchAllBundles() {
     const bundlesContainer = document.querySelector('#dataBundlesContent');
     if (!bundlesContainer) return;
@@ -493,27 +547,82 @@ async function fetchAllBundles() {
         });
     } catch (error) { console.error('Error fetching/rendering bundles:', error); }
 }
+*/
+
+
+// Function to render bundle tables (reusable)
+    function renderBundleTables(container, bundles, type) {
+        container.innerHTML = '';
+        const providers = ['MTN', 'AirtelTigo', 'Telecel'];
+        providers.forEach(provider => {
+            const providerBundles = bundles.filter(b => b.provider === provider);
+            let sectionHTML = `
+                <div class="provider-section">
+                    <h4 class="provider-title ${provider.toLowerCase()}"><i class="fas fa-circle"></i> ${provider}</h4>
+                    <div class="bundle-table-wrapper">
+                        <table class="bundle-table">
+                            <thead><tr><th>Volume</th><th>Selling Price</th><th>Supplier Cost</th><th>Actions</th></tr></thead>
+                            <tbody>`;
+            if (providerBundles.length > 0) {
+                providerBundles.forEach(bundle => {
+                    sectionHTML += `<tr class="table-row" data-id="${bundle.id}">
+                        <td>${bundle.volume}</td>
+                        <td>${parseFloat(bundle.selling_price).toFixed(2)}</td>
+                        <td>${parseFloat(bundle.supplier_cost).toFixed(2)}</td>
+                        <td class="actions"><i class="fas fa-edit action-edit"></i><i class="fas fa-trash action-delete"></i></td>
+                    </tr>`;
+                });
+            } else {
+                sectionHTML += `<tr><td colspan="4" class="empty-state-small">No bundles defined.</td></tr>`;
+            }
+            sectionHTML += `</tbody></table>
+                <button class="add-bundle-btn" data-provider="${provider}" data-type="${type}"><i class="fas fa-plus"></i> Add ${type} Bundle</button>
+            </div></div>`;
+            container.innerHTML += sectionHTML;
+        });
+    }
+}
+
+
+
+
+
+
+
+
+     // Function to fetch AGENT bundles
+    async function fetchAllBundles() {
+        const container = document.getElementById('agent-bundles-container');
+        if (!container) return;
+        container.innerHTML = '<div class="empty-state">Loading agent bundles...</div>';
+        try {
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const bundles = await response.json();
+            renderBundleTables(container, bundles, 'Agent');
+        } catch (error) { container.innerHTML = '<div class="empty-state">Failed to load agent bundles.</div>'; }
+    }
+
+
+
+
+
+
+
+
+
 
 
 // NEW FUNCTION for the new tab
-    async function fetchAllUserBundles() {
+   async function fetchAllUserBundles() {
         const container = document.getElementById('user-bundles-container');
         if (!container) return;
         container.innerHTML = '<div class="empty-state">Loading user bundles...</div>';
         try {
-             // This function also has access to the 'token'
-            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error('Failed to fetch user bundles');
+            const response = await fetch(`https://megalife-app-postgres.onrender.com/admin/user-bundles`, { headers: { 'Authorization': `Bearer ${token}` } });
             const bundles = await response.json();
-            renderBundleTables(container, bundles, 'user');
-        } catch(error) {
-             console.error('Error rendering user bundles:', error);
-            container.innerHTML = '<div class="empty-state">Failed to load user bundles.</div>';
-        }
+            renderBundleTables(container, bundles, 'User');
+        } catch (error) { container.innerHTML = '<div class="empty-state">Failed to load user bundles.</div>'; }
     }
-
 
 
 

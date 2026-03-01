@@ -126,7 +126,7 @@ if (userBundleForm) userBundleForm.addEventListener('submit', handleUserBundleFo
         });
     }
 
-/*
+
 
 document.addEventListener('click', async (e) => {
 
@@ -194,7 +194,6 @@ document.addEventListener('click', async (e) => {
             } catch (error) { console.error('Failed to delete user bundle:', error); }
         }
     }
-*/
 
 
 
@@ -202,6 +201,7 @@ document.addEventListener('click', async (e) => {
 
 
 
+/*
     
     // Page-wide listener for DYNAMICALLY created buttons (Edit, Delete, Forward, etc.)
     document.addEventListener('click', async (e) => {
@@ -262,7 +262,7 @@ document.addEventListener('click', async (e) => {
             }
         }
         
-
+*/
 
 
 

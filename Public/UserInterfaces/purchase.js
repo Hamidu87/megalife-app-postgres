@@ -326,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // This script handles the logic for data bundle purchase pages.
-// This script handles the logic for data bundle purchase pages.
 
   document.addEventListener('DOMContentLoaded', () => {
 

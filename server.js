@@ -795,8 +795,6 @@ app.delete('/admin/users/:id', authenticateAdmin, async (req, res) => {
 
 
 
-
-
 // READ all bundles
 app.get('/admin/bundles', authenticateAdmin, async (req, res) => {
     try {

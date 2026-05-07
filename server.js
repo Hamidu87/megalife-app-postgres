@@ -1145,11 +1145,11 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         }
         
         const bundle = bundleResult.rows[0];
-        const sellingPrice = parseFloat(bundle.price);
+        const price = parseFloat(bundle.price);
         const supplierPrice = parseFloat(bundle.supplierPrice); // Assuming you have this column
 
         // Security Check: Ensure the price sent from the frontend matches the price in your database
-        if (sellingPrice !== amount) {
+        if (price !== amount) {
             await client.query('ROLLBACK');
             return res.status(400).json({ message: 'Price mismatch error. Please refresh and try again.' });
         }
@@ -1159,7 +1159,7 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         const currentBalance = parseFloat(userResult.rows[0].walletBalance);
         
         // If the user's current balance is less than the official selling price, stop the transaction.
-        if (currentBalance < sellingPrice) {
+        if (currentBalance < price) {
             await client.query('ROLLBACK'); // Cancel all changes
             return res.status(402).json({ message: 'Insufficient wallet balance. Please top up your wallet.' });
         }
@@ -1167,10 +1167,10 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         // --- 3. IF CHECKS PASS, PROCESS THE TRANSACTION ---
 
         // Calculate the profit for this transaction
-        const profit = sellingPrice - supplierPrice;
+        const profit = price - supplierPrice;
         
         // Deduct the amount from the user's wallet
-        const newBalance = currentBalance - sellingPrice;
+        const newBalance = currentBalance - price;
         await client.query('UPDATE users SET "walletBalance" = $1 WHERE id = $2', [newBalance, userId]);
         
         // Create a new order ID
@@ -1179,7 +1179,7 @@ app.post('/purchase-bundle', authenticateToken, async (req, res) => {
         // Insert the complete transaction record, including the calculated profit
         const insertResult = await client.query(
             'INSERT INTO transactions ("userId", "orderId", type, details, amount, status, recipient, profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-            [userId, randomOrderId, type, details, sellingPrice, 'Processing', recipient, profit]
+            [userId, randomOrderId, type, details, price, 'Processing', recipient, profit]
         );
         
         // Add the new transaction to the background queue for forwarding
